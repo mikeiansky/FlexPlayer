@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -68,6 +69,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     public FlexPlayerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public void setContainerBackground(Drawable drawable) {
+        container.setBackground(drawable);
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -188,20 +193,28 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     public void play() {
-        mediaPlayer.start();
-        currentState = State.PLAY;
-        controller.setCurrentState(currentState);
-        startUpdateProgress();
-        controller.setKeepScreenOn(true);
+        if (haveDataSource) {
+            if (!mediaPlayer.isPlaying()) {
+                mediaPlayer.start();
+            }
+            currentState = State.PLAY;
+            controller.setCurrentState(currentState);
+            startUpdateProgress();
+            controller.setKeepScreenOn(true);
+        }
     }
 
     @Override
     public void pause() {
-        mediaPlayer.pause();
-        currentState = State.PAUSE;
-        controller.setCurrentState(currentState);
-        removeUpdateProgress();
-        controller.setKeepScreenOn(false);
+        if (haveDataSource) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+            }
+            currentState = State.PAUSE;
+            controller.setCurrentState(currentState);
+            removeUpdateProgress();
+            controller.setKeepScreenOn(false);
+        }
     }
 
     @Override
@@ -210,7 +223,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             return;
         }
         try {
-            mediaPlayer.pause();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+            }
             mediaPlayer.reset();
             mediaPlayer.setDataSource(getContext(), Uri.parse(videoPath));
             mediaPlayer.prepareAsync();
@@ -303,10 +318,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         float wr = 1f * width / maxWidth;
         float hr = 1f * height / maxHeight;
         if (wr > hr) {
-            textureView.setOreation(FlexTextureView.HORIZONTAL);
+            textureView.setOrientation(FlexTextureView.HORIZONTAL);
             textureView.setRate(1f * height / width);
         } else {
-            textureView.setOreation(FlexTextureView.VERTICAL);
+            textureView.setOrientation(FlexTextureView.VERTICAL);
             textureView.setRate(1f * width / height);
         }
     }

@@ -17,7 +17,7 @@ public class FlexTextureView extends TextureView {
     static final int VERTICAL = 1;
 
     private float rate;
-    private int oreation = HORIZONTAL;
+    private int orientation = HORIZONTAL;
 
     public FlexTextureView(Context context) {
         super(context);
@@ -41,8 +41,8 @@ public class FlexTextureView extends TextureView {
         requestLayout();
     }
 
-    void setOreation(int oreation) {
-        this.oreation = oreation;
+    void setOrientation(int orientation) {
+        this.orientation = orientation;
         requestLayout();
     }
 
@@ -50,7 +50,7 @@ public class FlexTextureView extends TextureView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthSpec = widthMeasureSpec;
         int heightSpec = heightMeasureSpec;
-        if (oreation == HORIZONTAL) {
+        if (orientation == HORIZONTAL) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             heightSpec = MeasureSpec.makeMeasureSpec(Math.round(width * rate), MeasureSpec.EXACTLY);
         } else {

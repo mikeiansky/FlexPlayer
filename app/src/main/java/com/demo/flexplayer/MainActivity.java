@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+//        flexPlayerView.setContainerBackground(getResources().getDrawable(R.drawable.white_background));
+
 
     }
 }
