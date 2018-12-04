@@ -38,14 +38,19 @@ public interface FlexPlayer {
     void seekTo(int mesc);
 
     /**
+     * 加载资源并播放
+     */
+    void start();
+
+    /**
      * 暂停
      */
     void pause();
 
     /**
-     * 开始播放
+     * 播放
      */
-    void start();
+    void play();
 
     /**
      * 进入全屏模式

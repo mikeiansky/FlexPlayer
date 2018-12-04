@@ -27,6 +27,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected View enterFullScreen;
     protected ImageView coverImage;
     protected View loadingView;
+    protected View centerStart;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -60,6 +61,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         enterFullScreen = content.findViewById(R.id.full_screen);
         enterFullScreen.setOnClickListener(this);
+
+        centerStart = content.findViewById(R.id.center_start);
+        centerStart.setOnClickListener(this);
     }
 
     @Override
@@ -83,6 +87,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     flexPlayer.exitFullScreen();
                 }
             }
+        } else if(id == R.id.center_start){
+            if(flexPlayer!=null){
+                flexPlayer.start();
+            }
         }
     }
 
@@ -93,6 +101,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
         }
         currentMode = mode;
+    }
+
+    public void updateProgress(){
+
     }
 
     public void setCurrentState(FlexPlayer.State state) {

@@ -7,6 +7,7 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
@@ -30,6 +31,14 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private TextureView textureView;
     private Mode currentMode = Mode.NORMAL;
     private State currentState = State.NONE;
+    private Handler handler = new Handler();
+    private String videoPath;
+    private Runnable updateProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateProgress();
+        }
+    };
 
     public FlexPlayerView(Context context) {
         super(context);
@@ -108,6 +117,19 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         }
     }
 
+    private void startUpdateProgress() {
+        handler.removeCallbacks(updateProgressRunnable);
+        updateProgress();
+    }
+
+    private void updateProgress() {
+        if (currentState == State.COMPLETE) {
+            return;
+        }
+        controller.updateProgress();
+        handler.postDelayed(updateProgressRunnable, 400);
+    }
+
     @Override
     public int getPosition() {
         return mediaPlayer.getCurrentPosition();
@@ -130,7 +152,19 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void start() {
-        mediaPlayer.start();
+        if (videoPath == null) {
+            return;
+        }
+        try {
+            mediaPlayer.pause();
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(getContext(), Uri.parse(videoPath));
+            mediaPlayer.prepareAsync();
+            currentState = State.BUFFER_START;
+            controller.setCurrentState(currentState);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -181,18 +215,13 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         }
     }
 
+    public void play() {
+        mediaPlayer.start();
+    }
+
     @Override
     public void setUp(Context context, String path) {
-        try {
-            mediaPlayer.pause();
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(context, Uri.parse(path));
-            mediaPlayer.prepareAsync();
-            currentState = State.BUFFER_START;
-            controller.setCurrentState(currentState);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        videoPath = path;
     }
 
     @Override

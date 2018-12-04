@@ -10,6 +10,7 @@
         android:background="@drawable/player_default_bg"
         android:scaleType="fitXY"
         android:visibility="visible" />
+
     <!--加载动画-->
     <LinearLayout
         android:id="@+id/loading"
