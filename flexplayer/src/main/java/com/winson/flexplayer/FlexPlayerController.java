@@ -53,6 +53,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private TextView changePositionCurrent;
     private View changeContainer;
     private ProgressBar changePositionProgress;
+    private ImageView backImage;
     private float downX;
     private float downY;
     private boolean isMove;
@@ -192,7 +193,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         });
 
-        content.findViewById(R.id.back).setOnClickListener(this);
+        backImage = content.findViewById(R.id.back);
+        backImage.setOnClickListener(this);
+        backImage.setVisibility(View.INVISIBLE);
 
         titleTextView = findViewById(R.id.title);
 
@@ -256,6 +259,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         onHidden = true;
         top.setVisibility(View.GONE);
         bottom.setVisibility(View.GONE);
+    }
+
+    public void showBackImage(boolean show) {
+        backImage.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override

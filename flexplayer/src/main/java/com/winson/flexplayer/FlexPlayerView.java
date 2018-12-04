@@ -39,6 +39,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private Handler handler = new Handler();
     private String videoPath;
     private int bufferPercent;
+    private int videoWidth;
+    private int videoHeight;
+
     private Runnable updateProgressRunnable = new Runnable() {
         @Override
         public void run() {
@@ -120,6 +123,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         tlp.gravity = Gravity.CENTER;
         container.addView(textureView, tlp);
+        container.setBackground(getResources().getDrawable(R.drawable.flex_video_black_bg));
 
         controller = new FlexPlayerController(getContext());
         setPlayerController(controller);
@@ -261,6 +265,15 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         if (controller != null) {
             controller.setCurrentMode(currentMode);
         }
+
+        controller.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                calculateSize();
+                controller.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+
     }
 
     @Override
@@ -282,6 +295,14 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             if (controller != null) {
                 controller.setCurrentMode(currentMode);
             }
+
+            controller.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    calculateSize();
+                    controller.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            });
         }
     }
 
@@ -304,6 +325,15 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
+    public boolean onBackPressed() {
+        if (currentMode == Mode.FULL_SCREEN) {
+            exitFullScreen();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
         currentState = State.PLAY;
@@ -313,16 +343,26 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+        videoWidth = width;
+        videoHeight = height;
+
+        calculateSize();
+    }
+
+    private void calculateSize() {
+        if (videoWidth <= 0 || videoHeight <= 0) {
+            return;
+        }
         int maxWidth = container.getWidth();
         int maxHeight = container.getHeight();
-        float wr = 1f * width / maxWidth;
-        float hr = 1f * height / maxHeight;
+        float wr = 1f * videoWidth / maxWidth;
+        float hr = 1f * videoHeight / maxHeight;
         if (wr > hr) {
             textureView.setOrientation(FlexTextureView.HORIZONTAL);
-            textureView.setRate(1f * height / width);
+            textureView.setRate(1f * videoHeight / videoWidth);
         } else {
             textureView.setOrientation(FlexTextureView.VERTICAL);
-            textureView.setRate(1f * width / height);
+            textureView.setRate(1f * videoWidth / videoHeight);
         }
     }
 

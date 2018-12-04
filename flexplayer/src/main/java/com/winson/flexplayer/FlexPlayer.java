@@ -105,4 +105,11 @@ public interface FlexPlayer {
      */
     void setPlayerController(FlexPlayerController controller);
 
+    /**
+     * 是否处理返回按钮事件
+     *
+     * @return
+     */
+    boolean onBackPressed();
+
 }
