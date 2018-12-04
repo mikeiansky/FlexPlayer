@@ -6,13 +6,16 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -27,6 +30,8 @@ import androidx.annotation.StringRes;
  */
 public class FlexPlayerController extends FrameLayout implements View.OnClickListener {
 
+    private static final String TAG = FlexPlayerController.class.getSimpleName();
+
     protected FlexPlayer flexPlayer;
     protected FlexPlayer.State currentState;
     protected FlexPlayer.Mode currentMode;
@@ -40,12 +45,20 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected SeekBar seekBar;
     protected ImageView restartOrPause;
     protected boolean seekBarOnTouch;
-    protected GestureDetector gestureDetector;
     protected View top, bottom;
     protected ValueAnimator showAnimator;
     protected ValueAnimator hiddenAnimator;
     private boolean onAnimator;
     private boolean onHidden;
+    private TextView changePositionCurrent;
+    private View changeContainer;
+    private ProgressBar changePositionProgress;
+    private float downX;
+    private float downY;
+    private boolean isMove;
+    private float touchSlop;
+    private int startPosition;
+    private int seekToProgress;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -69,11 +82,28 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        setOnClickListener(this);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!onAnimator) {
+                    if (onHidden) {
+                        showAnimator.start();
+                    } else {
+                        hiddenAnimator.start();
+                    }
+                }
+            }
+        });
         View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        changeContainer = content.findViewById(R.id.change_position);
+        changePositionCurrent = content.findViewById(R.id.change_position_current);
+        changePositionProgress = content.findViewById(R.id.change_position_progress);
+
         top = content.findViewById(R.id.top);
         bottom = content.findViewById(R.id.bottom);
 
@@ -153,44 +183,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         });
 
-        gestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onShowPress(MotionEvent e) {
-
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                if (!onAnimator) {
-                    if (onHidden) {
-                        showAnimator.start();
-                    } else {
-                        hiddenAnimator.start();
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                return false;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                return false;
-            }
-        });
         content.findViewById(R.id.back).setOnClickListener(this);
 
         titleTextView = findViewById(R.id.title);
@@ -249,7 +241,67 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 || currentState == FlexPlayer.State.PREPARE) {
             return super.onTouchEvent(event);
         }
-        gestureDetector.onTouchEvent(event);
+
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                downX = event.getRawX();
+                downY = event.getRawY();
+                isMove = false;
+                startPosition = flexPlayer.getPosition();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float cx = event.getRawX();
+                float cy = event.getRawY();
+                if (!isMove) {
+                    if (Math.abs(cx - downX) > touchSlop || Math.abs(cy - downY) > touchSlop) {
+                        isMove = true;
+                        changeContainer.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    int width = getWidth();
+                    float offsetX = cx - downX;
+                    float rate = offsetX / width;
+                    int duration = flexPlayer.getDuration();
+                    float offsetProgress = rate * duration;
+                    float targetProgress = offsetProgress + startPosition;
+                    if (targetProgress < 0) {
+                        targetProgress = 0;
+                        startPosition = 0;
+                        downX = cx;
+                    }
+                    if (targetProgress > duration) {
+                        targetProgress = duration;
+                        startPosition = duration;
+                        downX = cx;
+                    }
+                    String positionText = FlexPlayerUtils.formatTime((long) targetProgress);
+                    positionTextView.setText(positionText);
+                    changePositionCurrent.setText(positionText);
+                    int progress = (int) (100f * targetProgress / duration);
+                    seekBar.setProgress(progress);
+                    changePositionProgress.setProgress(progress);
+                    seekToProgress = (int) targetProgress;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                // 点击事件
+                if (!isMove) {
+                    if (!onAnimator) {
+                        if (onHidden) {
+                            showAnimator.start();
+                        } else {
+                            hiddenAnimator.start();
+                        }
+                    }
+                } else {
+                    flexPlayer.seekTo(seekToProgress);
+                }
+
+                seekBarOnTouch = false;
+                changeContainer.setVisibility(View.GONE);
+                break;
+        }
         return true;
     }
 
