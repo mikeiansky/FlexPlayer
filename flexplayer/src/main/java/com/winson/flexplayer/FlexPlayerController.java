@@ -393,6 +393,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         currentMode = mode;
     }
 
+    public ImageView getCoverImage() {
+        return coverImage;
+    }
+
     public void setCenterStartBackground(int res) {
         centerStart.setBackgroundResource(res);
     }

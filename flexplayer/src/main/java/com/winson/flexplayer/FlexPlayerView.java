@@ -43,6 +43,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         }
     };
 
+    public FlexPlayerController getController() {
+        return controller;
+    }
+
     public FlexPlayerView(Context context) {
         super(context);
         init(context, null, 0, 0);
