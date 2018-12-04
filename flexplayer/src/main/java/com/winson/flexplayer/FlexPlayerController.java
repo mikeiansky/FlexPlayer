@@ -169,6 +169,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         currentMode = mode;
     }
 
+    public void setCenterStartBackground(int res) {
+        centerStart.setBackgroundResource(res);
+    }
+
     public void setTitle(String title) {
         titleTextView.setText(title);
     }
