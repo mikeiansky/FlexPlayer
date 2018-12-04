@@ -45,6 +45,13 @@ public interface FlexPlayer {
     boolean haveDataSource();
 
     /**
+     * 是否在全屏状态
+     *
+     * @return true 为全屏状态
+     */
+    boolean isFullScreen();
+
+    /**
      * 跳转到相应进度
      *
      * @param mesc 进度

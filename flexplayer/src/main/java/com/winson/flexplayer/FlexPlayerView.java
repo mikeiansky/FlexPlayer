@@ -170,6 +170,11 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
+    public boolean isFullScreen() {
+        return currentMode == Mode.FULL_SCREEN;
+    }
+
+    @Override
     public boolean isPlaying() {
         return mediaPlayer.isPlaying();
     }

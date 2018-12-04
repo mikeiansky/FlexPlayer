@@ -1,8 +1,12 @@
 package com.winson.flexplayer;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +40,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected SeekBar seekBar;
     protected ImageView restartOrPause;
     protected boolean seekBarOnTouch;
+    protected GestureDetector gestureDetector;
+    protected View top, bottom;
+    protected ValueAnimator showAnimator;
+    protected ValueAnimator hiddenAnimator;
+    private boolean onAnimator;
+    private boolean onHidden;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -59,11 +69,128 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        setOnClickListener(this);
         View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+        top = content.findViewById(R.id.top);
+        bottom = content.findViewById(R.id.bottom);
 
+        showAnimator = ValueAnimator.ofFloat(0f, 1f);
+        showAnimator.setDuration(250);
+        showAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float alpha = (float) animation.getAnimatedValue();
+                top.setAlpha(alpha);
+                bottom.setAlpha(alpha);
+            }
+        });
+        showAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onHidden = false;
+                top.setVisibility(VISIBLE);
+                bottom.setVisibility(VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+                top.setVisibility(VISIBLE);
+                bottom.setVisibility(VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        hiddenAnimator = ValueAnimator.ofFloat(1f, 0f);
+        hiddenAnimator.setDuration(250);
+        hiddenAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float alpha = (float) animation.getAnimatedValue();
+                top.setAlpha(alpha);
+                bottom.setAlpha(alpha);
+            }
+        });
+        hiddenAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onHidden = true;
+                top.setVisibility(VISIBLE);
+                bottom.setVisibility(VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+                top.setVisibility(GONE);
+                bottom.setVisibility(GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        gestureDetector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                if (!onAnimator) {
+                    if (onHidden) {
+                        showAnimator.start();
+                    } else {
+                        hiddenAnimator.start();
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return false;
+            }
+        });
         content.findViewById(R.id.back).setOnClickListener(this);
 
         titleTextView = findViewById(R.id.title);
@@ -110,7 +237,19 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        super.onTouchEvent(event);
+        if (onAnimator) {
+            return super.onTouchEvent(event);
+        }
+        // 只有在有数据和全屏的情况下才能拖动
+        if (!flexPlayer.haveDataSource() || !flexPlayer.isFullScreen()) {
+            return super.onTouchEvent(event);
+        }
+        // 没有装载数据和加载数据的时候
+        if (currentState == FlexPlayer.State.NONE
+                || currentState == FlexPlayer.State.PREPARE) {
+            return super.onTouchEvent(event);
+        }
+        gestureDetector.onTouchEvent(event);
         return true;
     }
 
