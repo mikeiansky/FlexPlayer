@@ -192,6 +192,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         currentState = State.PLAY;
         controller.setCurrentState(currentState);
         startUpdateProgress();
+        controller.setKeepScreenOn(true);
     }
 
     @Override
@@ -200,6 +201,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         currentState = State.PAUSE;
         controller.setCurrentState(currentState);
         removeUpdateProgress();
+        controller.setKeepScreenOn(false);
     }
 
     @Override
@@ -314,6 +316,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         currentState = State.COMPLETE;
         controller.setCurrentState(currentState);
         removeUpdateProgress();
+        controller.setKeepScreenOn(false);
     }
 
     @Override
@@ -328,7 +331,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        Log.d(TAG, "onInfo -------> what : " + what + " , extra : " + extra);
         switch (what) {
             // 播放器开始渲染
             case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
