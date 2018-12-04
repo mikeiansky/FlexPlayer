@@ -289,6 +289,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     if (Math.abs(cx - downX) > touchSlop || Math.abs(cy - downY) > touchSlop) {
                         isMove = true;
                         changeContainer.setVisibility(View.VISIBLE);
+                        seekBarOnTouch = true;
                     }
                 } else {
                     int width = getWidth();
