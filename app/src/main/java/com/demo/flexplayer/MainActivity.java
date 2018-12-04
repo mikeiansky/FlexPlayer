@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.winson.flexplayer.FlexPlayerController;
 import com.winson.flexplayer.FlexPlayerView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
                 flexPlayerView.enterFullScreen();
             }
         });
+
+        FlexPlayerController controller = new FlexPlayerController(this);
+        flexPlayerView.setPlayerController(controller);
 
     }
 }

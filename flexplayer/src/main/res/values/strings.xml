@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FlexPlayer</string>
+    <string name="flex_player_on_loading">正在缓冲...</string>
+    <string name="flex_player_repeat_play">重新播放</string>
+    <string name="flex_player_play_error_notify">播放错误，请重试。</string>
+    <string name="flex_player_play_error_retry">点击重试</string>
 </resources>

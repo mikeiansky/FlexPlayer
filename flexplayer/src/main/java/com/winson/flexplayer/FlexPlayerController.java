@@ -3,7 +3,10 @@ package com.winson.flexplayer;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -42,7 +45,10 @@ public class FlexPlayerController extends FrameLayout {
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        
+        View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        content.setLayoutParams(lp);
+        addView(content);
     }
 
     @Override
