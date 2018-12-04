@@ -9,7 +9,7 @@ import android.content.Context;
 public interface FlexPlayer {
 
     enum State {
-        NONE, PAUSE, PLAY, BUFFER_START, BUFFER_END, COMPLETE
+        NONE, PREPARE, PAUSE, PLAY, BUFFER_START, BUFFER_END, COMPLETE
     }
 
     enum Mode {
@@ -38,11 +38,25 @@ public interface FlexPlayer {
     int getBufferPercentage();
 
     /**
+     * 是否已经装载播放资源
+     *
+     * @return true 为已经装载播放资源
+     */
+    boolean haveDataSource();
+
+    /**
      * 跳转到相应进度
      *
      * @param mesc 进度
      */
     void seekTo(int mesc);
+
+    /**
+     * 是否在播放中
+     *
+     * @return true 为播放中
+     */
+    boolean isPlaying();
 
     /**
      * 加载资源并播放

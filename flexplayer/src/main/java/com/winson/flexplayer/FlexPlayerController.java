@@ -33,6 +33,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected TextView positionTextView, durationTextView;
     protected SeekBar seekBar;
     protected ImageView restartOrPause;
+    protected boolean seekBarOnTouch;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -81,12 +82,19 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                seekBarOnTouch = true;
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                seekBarOnTouch = false;
+                int position = (int) (flexPlayer.getDuration() * seekBar.getProgress() / 100f);
+                flexPlayer.seekTo(position);
+                if (flexPlayer.haveDataSource()) {
+                    if (!flexPlayer.isPlaying()) {
+                        flexPlayer.play();
+                    }
+                }
             }
         });
 
@@ -129,13 +137,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         } else if (id == R.id.restart_or_pause) {
             if (flexPlayer != null) {
-                if (currentState == FlexPlayer.State.NONE) {
-                    flexPlayer.start();
-                } else {
-                    if (currentState == FlexPlayer.State.PAUSE) {
-                        flexPlayer.play();
+                if (currentState != FlexPlayer.State.PREPARE) {
+                    if (currentState == FlexPlayer.State.NONE) {
+                        flexPlayer.start();
                     } else {
-                        flexPlayer.pause();
+                        if (currentState == FlexPlayer.State.PAUSE) {
+                            flexPlayer.play();
+                        } else {
+                            flexPlayer.pause();
+                        }
                     }
                 }
             }
@@ -158,12 +168,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     public void updateProgress() {
         long position = flexPlayer.getPosition();
         long duration = flexPlayer.getDuration();
-        int bufferPercentage = flexPlayer.getBufferPercentage();
-        seekBar.setSecondaryProgress(bufferPercentage);
-        int progress = (int) (100f * position / duration);
-        seekBar.setProgress(progress);
         positionTextView.setText(FlexPlayerUtils.formatTime(position));
         durationTextView.setText(FlexPlayerUtils.formatTime(duration));
+        if (!seekBarOnTouch) {
+            int bufferPercentage = flexPlayer.getBufferPercentage();
+            seekBar.setSecondaryProgress(bufferPercentage);
+            int progress = (int) (100f * position / duration);
+            seekBar.setProgress(progress);
+        }
     }
 
     public void setCurrentState(FlexPlayer.State state) {
@@ -174,6 +186,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 loadingView.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
+            case PREPARE:
             case BUFFER_START:
                 centerStart.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);

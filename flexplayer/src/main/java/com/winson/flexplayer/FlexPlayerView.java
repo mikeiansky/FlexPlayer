@@ -32,6 +32,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private TextureView textureView;
     private Mode currentMode = Mode.NORMAL;
     private State currentState = State.NONE;
+    private boolean haveDataSource;
     private Handler handler = new Handler();
     private String videoPath;
     private int bufferPercent;
@@ -163,19 +164,29 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         mediaPlayer.seekTo(mesc);
     }
 
+    @Override
+    public boolean haveDataSource() {
+        return haveDataSource;
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return mediaPlayer.isPlaying();
+    }
+
     public void play() {
         mediaPlayer.start();
-        startUpdateProgress();
         currentState = State.PLAY;
         controller.setCurrentState(currentState);
+        startUpdateProgress();
     }
 
     @Override
     public void pause() {
         mediaPlayer.pause();
-        removeUpdateProgress();
         currentState = State.PAUSE;
         controller.setCurrentState(currentState);
+        removeUpdateProgress();
     }
 
     @Override
@@ -188,7 +199,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             mediaPlayer.reset();
             mediaPlayer.setDataSource(getContext(), Uri.parse(videoPath));
             mediaPlayer.prepareAsync();
-            currentState = State.BUFFER_START;
+            haveDataSource = true;
+            currentState = State.PREPARE;
             controller.setCurrentState(currentState);
         } catch (IOException e) {
             e.printStackTrace();
