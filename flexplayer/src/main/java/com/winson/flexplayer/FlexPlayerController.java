@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -32,22 +33,21 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     private static final String TAG = FlexPlayerController.class.getSimpleName();
 
-    protected FlexPlayer flexPlayer;
-    protected FlexPlayer.State currentState;
-    protected FlexPlayer.Mode currentMode;
-
-    protected View enterFullScreen;
-    protected ImageView coverImage;
-    protected View loadingView;
-    protected View centerStart;
-    protected TextView positionTextView, durationTextView;
-    protected TextView titleTextView;
-    protected SeekBar seekBar;
-    protected ImageView restartOrPause;
-    protected boolean seekBarOnTouch;
-    protected View top, bottom;
-    protected ValueAnimator showAnimator;
-    protected ValueAnimator hiddenAnimator;
+    private FlexPlayer flexPlayer;
+    private FlexPlayer.State currentState;
+    private FlexPlayer.Mode currentMode;
+    private View enterFullScreen;
+    private ImageView coverImage;
+    private View loadingView;
+    private View centerStart;
+    private TextView positionTextView, durationTextView;
+    private TextView titleTextView;
+    private SeekBar seekBar;
+    private ImageView restartOrPause;
+    private boolean seekBarOnTouch;
+    private View top, bottom;
+    private ValueAnimator showAnimator;
+    private ValueAnimator hiddenAnimator;
     private boolean onAnimator;
     private boolean onHidden;
     private TextView changePositionCurrent;
@@ -59,6 +59,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private float touchSlop;
     private int startPosition;
     private int seekToProgress;
+    private Handler handler = new Handler();
+    private Runnable hiddenTopAndBottomRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hiddenAnimator.start();
+        }
+    };
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -124,6 +131,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 onHidden = false;
                 top.setVisibility(VISIBLE);
                 bottom.setVisibility(VISIBLE);
+                hiddenTopAndBottomDelay();
             }
 
             @Override
@@ -162,6 +170,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 onHidden = true;
                 top.setVisibility(VISIBLE);
                 bottom.setVisibility(VISIBLE);
+                clearHiddenRunnable();
             }
 
             @Override
@@ -225,6 +234,28 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         durationTextView = content.findViewById(R.id.duration);
         restartOrPause = content.findViewById(R.id.restart_or_pause);
         restartOrPause.setOnClickListener(this);
+
+        hiddenTopAndBottom();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+    }
+
+    private void clearHiddenRunnable() {
+        handler.removeCallbacks(hiddenTopAndBottomRunnable);
+    }
+
+    private void hiddenTopAndBottomDelay() {
+        handler.removeCallbacks(hiddenTopAndBottomRunnable);
+        handler.postDelayed(hiddenTopAndBottomRunnable, 5000);
+    }
+
+    private void hiddenTopAndBottom() {
+        onHidden = true;
+        top.setVisibility(View.GONE);
+        bottom.setVisibility(View.GONE);
     }
 
     @Override
@@ -245,6 +276,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                clearHiddenRunnable();
                 downX = event.getRawX();
                 downY = event.getRawY();
                 isMove = false;
@@ -295,6 +327,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                         }
                     }
                 } else {
+                    hiddenTopAndBottomDelay();
                     flexPlayer.seekTo(seekToProgress);
                 }
 
