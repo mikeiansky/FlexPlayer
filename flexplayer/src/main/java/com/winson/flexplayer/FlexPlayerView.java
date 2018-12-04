@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private FrameLayout container;
     private TextureView textureView;
     private Mode currentMode = Mode.NORMAL;
+    private State currentState = State.NONE;
 
     public FlexPlayerView(Context context) {
         super(context);
@@ -89,6 +91,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         container.addView(textureView, tlp);
 
+        controller = new FlexPlayerController(getContext());
+        setPlayerController(controller);
     }
 
     @Override
@@ -171,7 +175,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             this.addView(container, params);
 
             currentMode = Mode.NORMAL;
-            if(controller!=null){
+            if (controller != null) {
                 controller.setCurrentMode(currentMode);
             }
         }
@@ -184,6 +188,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             mediaPlayer.reset();
             mediaPlayer.setDataSource(context, Uri.parse(path));
             mediaPlayer.prepareAsync();
+            currentState = State.BUFFER_START;
+            controller.setCurrentState(currentState);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -197,11 +203,14 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         container.addView(controller, lp);
         controller.setCurrentMode(currentMode);
+        controller.setCurrentState(currentState);
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        currentState = State.PLAY;
+        controller.setCurrentState(currentState);
     }
 
     @Override
@@ -211,7 +220,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        currentState = State.COMPLETE;
+        controller.setCurrentState(currentState);
     }
 
     @Override
@@ -226,6 +236,22 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        Log.d(TAG, "onInfo -------> what : " + what + " , extra : " + extra);
+        switch (what) {
+            // 播放器开始渲染
+            case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
+                break;
+            // MediaPlayer暂时不播放，以缓冲更多的数据
+            case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                currentState = State.BUFFER_START;
+                controller.setCurrentState(currentState);
+                break;
+            // 填充缓冲区后，MediaPlayer恢复播放/暂停
+            case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                currentState = State.BUFFER_END;
+                controller.setCurrentState(currentState);
+                break;
+        }
         return false;
     }
 

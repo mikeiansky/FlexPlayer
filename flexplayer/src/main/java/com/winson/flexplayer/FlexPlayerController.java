@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +25,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected FlexPlayer.Mode currentMode;
 
     protected View enterFullScreen;
+    protected ImageView coverImage;
+    protected View loadingView;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -51,6 +54,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        coverImage = content.findViewById(R.id.cover_image);
+        loadingView = content.findViewById(R.id.loading);
 
         enterFullScreen = content.findViewById(R.id.full_screen);
         enterFullScreen.setOnClickListener(this);
@@ -87,6 +93,31 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
         }
         currentMode = mode;
+    }
+
+    public void setCurrentState(FlexPlayer.State state) {
+        switch (state) {
+            case NONE:
+                coverImage.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.GONE);
+                break;
+            case BUFFER_START:
+                loadingView.setVisibility(View.VISIBLE);
+                break;
+            case BUFFER_END:
+                loadingView.setVisibility(View.GONE);
+                break;
+            case PLAY:
+                coverImage.setVisibility(View.GONE);
+                loadingView.setVisibility(View.GONE);
+                break;
+            case PAUSE:
+                break;
+            case COMPLETE:
+                loadingView.setVisibility(View.GONE);
+                break;
+        }
+        currentState = state;
     }
 
 }

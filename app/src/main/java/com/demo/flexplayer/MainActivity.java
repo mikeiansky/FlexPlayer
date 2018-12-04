@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        FlexPlayerController controller = new FlexPlayerController(this);
-        flexPlayerView.setPlayerController(controller);
 
     }
 }

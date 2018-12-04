@@ -9,7 +9,7 @@ import android.content.Context;
 public interface FlexPlayer {
 
     enum State {
-        NONE, PAUSE, PLAY, PREPARE, COMPLETE
+        NONE, PAUSE, PLAY, BUFFER_START, BUFFER_END, COMPLETE
     }
 
     enum Mode {
