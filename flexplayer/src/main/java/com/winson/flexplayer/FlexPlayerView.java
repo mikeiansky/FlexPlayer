@@ -131,7 +131,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void enterFullScreen() {
-        if (currentMode == Mode.FULLSCREEN) {
+        if (currentMode == Mode.FULL_SCREEN) {
             return;
         }
         // 隐藏ActionBar、状态栏，并横屏
@@ -149,12 +149,32 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 ViewGroup.LayoutParams.MATCH_PARENT);
         contentView.addView(container, params);
 
-        currentMode = Mode.FULLSCREEN;
+        currentMode = Mode.FULL_SCREEN;
+        if (controller != null) {
+            controller.setCurrentMode(currentMode);
+        }
     }
 
     @Override
     public void exitFullScreen() {
+        if (currentMode == Mode.FULL_SCREEN) {
+            FlexPlayerUtils.showActionBar(getContext());
+            FlexPlayerUtils.scanForActivity(getContext())
+                    .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+            ViewGroup contentView = (ViewGroup) FlexPlayerUtils.scanForActivity(getContext())
+                    .findViewById(android.R.id.content);
+            contentView.removeView(container);
+            LayoutParams params = new LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            this.addView(container, params);
+
+            currentMode = Mode.NORMAL;
+            if(controller!=null){
+                controller.setCurrentMode(currentMode);
+            }
+        }
     }
 
     @Override
@@ -176,6 +196,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         container.addView(controller, lp);
+        controller.setCurrentMode(currentMode);
     }
 
     @Override

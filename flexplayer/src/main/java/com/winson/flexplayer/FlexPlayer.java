@@ -13,7 +13,7 @@ public interface FlexPlayer {
     }
 
     enum Mode {
-        NORMAL, FULLSCREEN
+        NORMAL, FULL_SCREEN
     }
 
     /**
