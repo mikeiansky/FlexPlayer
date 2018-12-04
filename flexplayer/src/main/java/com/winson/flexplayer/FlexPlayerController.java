@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.StringRes;
 
 /**
  * @date on 2018/12/4
@@ -31,6 +32,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected View loadingView;
     protected View centerStart;
     protected TextView positionTextView, durationTextView;
+    protected TextView titleTextView;
     protected SeekBar seekBar;
     protected ImageView restartOrPause;
     protected boolean seekBarOnTouch;
@@ -63,6 +65,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         addView(content);
 
         content.findViewById(R.id.back).setOnClickListener(this);
+
+        titleTextView = findViewById(R.id.title);
 
         coverImage = content.findViewById(R.id.cover_image);
         loadingView = content.findViewById(R.id.loading);
@@ -163,6 +167,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
         }
         currentMode = mode;
+    }
+
+    public void setTitle(String title) {
+        titleTextView.setText(title);
+    }
+
+    public void setTitle(@StringRes int titleRes) {
+        titleTextView.setText(titleRes);
     }
 
     public void updateProgress() {
