@@ -26,6 +26,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     public static final String TAG = FlexPlayerView.class.getSimpleName();
 
     private MediaPlayer mediaPlayer;
+    private SurfaceTexture surfaceTexture;
     private FlexPlayerController controller;
     private FrameLayout container;
     private TextureView textureView;
@@ -79,8 +80,14 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                Surface s = new Surface(surface);
-                mediaPlayer.setSurface(s);
+                if (surfaceTexture == null) {
+                    surfaceTexture = surface;
+                    Surface s = new Surface(surfaceTexture);
+                    mediaPlayer.setSurface(s);
+                } else {
+                    textureView.setSurfaceTexture(surfaceTexture);
+                }
+
             }
 
             @Override
@@ -156,10 +163,19 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         mediaPlayer.seekTo(mesc);
     }
 
+    public void play() {
+        mediaPlayer.start();
+        startUpdateProgress();
+        currentState = State.PLAY;
+        controller.setCurrentState(currentState);
+    }
+
     @Override
     public void pause() {
         mediaPlayer.pause();
         removeUpdateProgress();
+        currentState = State.PAUSE;
+        controller.setCurrentState(currentState);
     }
 
     @Override
@@ -225,11 +241,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 controller.setCurrentMode(currentMode);
             }
         }
-    }
-
-    public void play() {
-        startUpdateProgress();
-        mediaPlayer.start();
     }
 
     @Override

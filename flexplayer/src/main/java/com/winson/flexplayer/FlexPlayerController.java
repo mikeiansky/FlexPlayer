@@ -32,6 +32,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected View centerStart;
     protected TextView positionTextView, durationTextView;
     protected SeekBar seekBar;
+    protected ImageView restartOrPause;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -73,6 +74,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         positionTextView = content.findViewById(R.id.position);
         durationTextView = content.findViewById(R.id.duration);
+        restartOrPause = content.findViewById(R.id.restart_or_pause);
+        restartOrPause.setOnClickListener(this);
     }
 
     @Override
@@ -99,6 +102,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         } else if (id == R.id.center_start) {
             if (flexPlayer != null) {
                 flexPlayer.start();
+            }
+        } else if (id == R.id.restart_or_pause) {
+            if (flexPlayer != null) {
+                if(currentState == FlexPlayer.State.PAUSE){
+                    flexPlayer.play();
+                }else{
+                    flexPlayer.pause();
+                }
             }
         }
     }
@@ -128,6 +139,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             case NONE:
                 coverImage.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
+                restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
             case BUFFER_START:
                 loadingView.setVisibility(View.VISIBLE);
@@ -136,12 +148,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 loadingView.setVisibility(View.GONE);
                 break;
             case PLAY:
+                restartOrPause.setBackgroundResource(R.drawable.ic_player_pause);
                 coverImage.setVisibility(View.GONE);
                 loadingView.setVisibility(View.GONE);
                 break;
             case PAUSE:
+                restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
             case COMPLETE:
+                restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 loadingView.setVisibility(View.GONE);
                 break;
         }
