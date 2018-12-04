@@ -8,8 +8,12 @@ import android.content.Context;
  */
 public interface FlexPlayer {
 
-    enum Mode {
+    enum State {
         NONE, PAUSE, PLAY, PREPARE, COMPLETE
+    }
+
+    enum Mode {
+        NORMAL, FULLSCREEN
     }
 
     /**

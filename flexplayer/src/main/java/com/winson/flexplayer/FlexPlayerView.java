@@ -2,6 +2,7 @@ package com.winson.flexplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.io.IOException;
@@ -24,6 +26,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private MediaPlayer mediaPlayer;
     private FrameLayout container;
     private TextureView textureView;
+    private Mode currentMode = Mode.NORMAL;
 
     public FlexPlayerView(Context context) {
         super(context);
@@ -127,7 +130,25 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void enterFullScreen() {
+        if (currentMode == Mode.FULLSCREEN) {
+            return;
+        }
+        // 隐藏ActionBar、状态栏，并横屏
+        FlexPlayerUtils.hideActionBar(getContext());
+        FlexPlayerUtils.scanForActivity(getContext())
+                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        ViewGroup contentView = (ViewGroup) FlexPlayerUtils.scanForActivity(getContext())
+                .findViewById(android.R.id.content);
+
+        this.removeView(container);
+
+        LayoutParams params = new LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        contentView.addView(container, params);
+        
+        currentMode = Mode.FULLSCREEN;
     }
 
     @Override

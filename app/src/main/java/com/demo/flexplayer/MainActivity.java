@@ -29,5 +29,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button enterFullScreen = findViewById(R.id.enter_fullscreen);
+        enterFullScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                flexPlayerView.enterFullScreen();
+            }
+        });
+
     }
 }
