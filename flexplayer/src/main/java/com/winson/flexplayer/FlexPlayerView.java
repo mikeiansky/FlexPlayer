@@ -246,6 +246,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public void setUp(Context context, String path) {
         videoPath = path;
+        currentState = State.NONE;
+        controller.setCurrentState(currentState);
     }
 
     @Override

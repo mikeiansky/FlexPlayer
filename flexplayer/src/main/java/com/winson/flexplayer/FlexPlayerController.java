@@ -61,6 +61,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         content.setLayoutParams(lp);
         addView(content);
 
+        content.findViewById(R.id.back).setOnClickListener(this);
+
         coverImage = content.findViewById(R.id.cover_image);
         loadingView = content.findViewById(R.id.loading);
 
@@ -71,6 +73,22 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         centerStart.setOnClickListener(this);
 
         seekBar = content.findViewById(R.id.seek);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         positionTextView = content.findViewById(R.id.position);
         durationTextView = content.findViewById(R.id.duration);
@@ -100,16 +118,30 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 }
             }
         } else if (id == R.id.center_start) {
-            if (flexPlayer != null) {
-                flexPlayer.start();
+            if (currentState == FlexPlayer.State.NONE) {
+                if (flexPlayer != null) {
+                    flexPlayer.start();
+                }
+            } else {
+                if (flexPlayer != null) {
+                    flexPlayer.play();
+                }
             }
         } else if (id == R.id.restart_or_pause) {
             if (flexPlayer != null) {
-                if(currentState == FlexPlayer.State.PAUSE){
-                    flexPlayer.play();
-                }else{
-                    flexPlayer.pause();
+                if (currentState == FlexPlayer.State.NONE) {
+                    flexPlayer.start();
+                } else {
+                    if (currentState == FlexPlayer.State.PAUSE) {
+                        flexPlayer.play();
+                    } else {
+                        flexPlayer.pause();
+                    }
                 }
+            }
+        } else if (id == R.id.back) {
+            if (flexPlayer != null && currentMode == FlexPlayer.Mode.FULL_SCREEN) {
+                flexPlayer.exitFullScreen();
             }
         }
     }
@@ -137,25 +169,30 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     public void setCurrentState(FlexPlayer.State state) {
         switch (state) {
             case NONE:
+                centerStart.setVisibility(View.VISIBLE);
                 coverImage.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
             case BUFFER_START:
+                centerStart.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
                 break;
             case BUFFER_END:
                 loadingView.setVisibility(View.GONE);
                 break;
             case PLAY:
+                centerStart.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_pause);
                 coverImage.setVisibility(View.GONE);
                 loadingView.setVisibility(View.GONE);
                 break;
             case PAUSE:
+                centerStart.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
             case COMPLETE:
+                centerStart.setVisibility(View.VISIBLE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 loadingView.setVisibility(View.GONE);
                 break;
