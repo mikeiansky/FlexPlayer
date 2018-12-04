@@ -10,9 +10,11 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private SurfaceTexture surfaceTexture;
     private FlexPlayerController controller;
     private FrameLayout container;
-    private TextureView textureView;
+    private FlexTextureView textureView;
     private Mode currentMode = Mode.NORMAL;
     private State currentState = State.NONE;
     private boolean haveDataSource;
@@ -81,7 +83,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         addView(container, lp);
 
-        textureView = new TextureView(getContext());
+        textureView = new FlexTextureView(getContext());
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -111,10 +113,12 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             }
         });
         FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        tlp.gravity = Gravity.CENTER;
         container.addView(textureView, tlp);
 
         controller = new FlexPlayerController(getContext());
         setPlayerController(controller);
+
     }
 
     @Override
@@ -292,7 +296,17 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-
+        int maxWidth = container.getWidth();
+        int maxHeight = container.getHeight();
+        float wr = 1f * width / maxWidth;
+        float hr = 1f * height / maxHeight;
+        if (wr > hr) {
+            textureView.setOreation(FlexTextureView.HORIZONTAL);
+            textureView.setRate(1f * height / width);
+        } else {
+            textureView.setOreation(FlexTextureView.VERTICAL);
+            textureView.setRate(1f * width / height);
+        }
     }
 
     @Override
