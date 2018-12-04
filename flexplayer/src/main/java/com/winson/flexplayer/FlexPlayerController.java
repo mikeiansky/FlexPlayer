@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +30,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected ImageView coverImage;
     protected View loadingView;
     protected View centerStart;
+    protected TextView positionTextView, durationTextView;
+    protected SeekBar seekBar;
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -64,6 +68,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         centerStart = content.findViewById(R.id.center_start);
         centerStart.setOnClickListener(this);
+
+        seekBar = content.findViewById(R.id.seek);
+
+        positionTextView = content.findViewById(R.id.position);
+        durationTextView = content.findViewById(R.id.duration);
     }
 
     @Override
@@ -87,8 +96,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     flexPlayer.exitFullScreen();
                 }
             }
-        } else if(id == R.id.center_start){
-            if(flexPlayer!=null){
+        } else if (id == R.id.center_start) {
+            if (flexPlayer != null) {
                 flexPlayer.start();
             }
         }
@@ -103,8 +112,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         currentMode = mode;
     }
 
-    public void updateProgress(){
-
+    public void updateProgress() {
+        long position = flexPlayer.getPosition();
+        long duration = flexPlayer.getDuration();
+        int bufferPercentage = flexPlayer.getBufferPercentage();
+        seekBar.setSecondaryProgress(bufferPercentage);
+        int progress = (int) (100f * position / duration);
+        seekBar.setProgress(progress);
+        positionTextView.setText(FlexPlayerUtils.formatTime(position));
+        durationTextView.setText(FlexPlayerUtils.formatTime(duration));
     }
 
     public void setCurrentState(FlexPlayer.State state) {

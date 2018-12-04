@@ -31,6 +31,13 @@ public interface FlexPlayer {
     int getDuration();
 
     /**
+     * 获取视频缓冲百分比
+     *
+     * @return 缓冲白百分比
+     */
+    int getBufferPercentage();
+
+    /**
      * 跳转到相应进度
      *
      * @param mesc 进度

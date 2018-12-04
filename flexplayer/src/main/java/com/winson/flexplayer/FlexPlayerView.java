@@ -33,6 +33,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private State currentState = State.NONE;
     private Handler handler = new Handler();
     private String videoPath;
+    private int bufferPercent;
     private Runnable updateProgressRunnable = new Runnable() {
         @Override
         public void run() {
@@ -111,6 +112,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     private void release() {
+        removeUpdateProgress();
         if (mediaPlayer != null) {
             mediaPlayer.pause();
             mediaPlayer.release();
@@ -120,6 +122,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private void startUpdateProgress() {
         handler.removeCallbacks(updateProgressRunnable);
         updateProgress();
+    }
+
+    private void removeUpdateProgress() {
+        handler.removeCallbacks(updateProgressRunnable);
     }
 
     private void updateProgress() {
@@ -141,6 +147,11 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
+    public int getBufferPercentage() {
+        return bufferPercent;
+    }
+
+    @Override
     public void seekTo(int mesc) {
         mediaPlayer.seekTo(mesc);
     }
@@ -148,6 +159,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public void pause() {
         mediaPlayer.pause();
+        removeUpdateProgress();
     }
 
     @Override
@@ -216,6 +228,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     public void play() {
+        startUpdateProgress();
         mediaPlayer.start();
     }
 
@@ -240,6 +253,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         mp.start();
         currentState = State.PLAY;
         controller.setCurrentState(currentState);
+        startUpdateProgress();
     }
 
     @Override
@@ -251,6 +265,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     public void onCompletion(MediaPlayer mp) {
         currentState = State.COMPLETE;
         controller.setCurrentState(currentState);
+        removeUpdateProgress();
     }
 
     @Override
@@ -260,7 +275,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
+        bufferPercent = percent;
     }
 
     @Override
