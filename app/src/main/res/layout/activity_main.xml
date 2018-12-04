@@ -13,17 +13,17 @@
         android:layout_height="300dp" />
 
     <Button
-        android:id="@+id/play"
+        android:id="@+id/http_path"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="play" />
+        android:text="http path" />
 
     <Button
-        android:id="@+id/enter_fullscreen"
+        android:id="@+id/local_path"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Enter FullScreen" />
+        android:text="local path" />
 
 </LinearLayout>
