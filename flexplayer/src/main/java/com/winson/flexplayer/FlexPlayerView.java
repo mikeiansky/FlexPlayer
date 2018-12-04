@@ -24,6 +24,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     public static final String TAG = FlexPlayerView.class.getSimpleName();
 
     private MediaPlayer mediaPlayer;
+    private FlexPlayerController controller;
     private FrameLayout container;
     private TextureView textureView;
     private Mode currentMode = Mode.NORMAL;
@@ -147,7 +148,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         contentView.addView(container, params);
-        
+
         currentMode = Mode.FULLSCREEN;
     }
 
@@ -166,6 +167,15 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setPlayerController(FlexPlayerController controller) {
+        this.controller = controller;
+        controller.setFlexPlayer(this);
+
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        container.addView(controller, lp);
     }
 
     @Override

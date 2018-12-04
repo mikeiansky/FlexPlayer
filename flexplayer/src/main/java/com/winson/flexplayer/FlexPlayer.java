@@ -65,4 +65,11 @@ public interface FlexPlayer {
      */
     void setUp(Context context, String path);
 
+    /**
+     * 设置播放器控制类
+     *
+     * @param controller
+     */
+    void setPlayerController(FlexPlayerController controller);
+
 }
