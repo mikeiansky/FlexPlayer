@@ -139,7 +139,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private void release() {
         removeUpdateProgress();
         if (mediaPlayer != null) {
-            mediaPlayer.pause();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+            }
+            mediaPlayer.reset();
             mediaPlayer.release();
         }
     }
