@@ -138,13 +138,18 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     private void release() {
         removeUpdateProgress();
-        if (mediaPlayer != null) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
+        try {
+            if (mediaPlayer != null) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+                mediaPlayer.reset();
+                mediaPlayer.release();
             }
-            mediaPlayer.reset();
-            mediaPlayer.release();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     private void startUpdateProgress() {
@@ -214,8 +219,12 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public void pause() {
         if (haveDataSource) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             currentState = State.PAUSE;
             controller.setCurrentState(currentState);
@@ -239,7 +248,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             haveDataSource = true;
             currentState = State.PREPARE;
             controller.setCurrentState(currentState);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
