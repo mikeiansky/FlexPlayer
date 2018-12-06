@@ -123,6 +123,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 float alpha = (float) animation.getAnimatedValue();
                 top.setAlpha(alpha);
                 bottom.setAlpha(alpha);
+                if (currentState == FlexPlayer.State.PAUSE) {
+                    centerStart.setAlpha(alpha);
+                }
             }
         });
         showAnimator.addListener(new Animator.AnimatorListener() {
@@ -132,7 +135,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 onHidden = false;
                 top.setVisibility(VISIBLE);
                 bottom.setVisibility(VISIBLE);
-                hiddenTopAndBottomDelay();
+                if (currentState == FlexPlayer.State.PLAY) {
+                    hiddenTopAndBottomDelay();
+                } else {
+                    clearHiddenRunnable();
+                }
             }
 
             @Override
@@ -162,6 +169,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 float alpha = (float) animation.getAnimatedValue();
                 top.setAlpha(alpha);
                 bottom.setAlpha(alpha);
+                if (currentState == FlexPlayer.State.PAUSE) {
+                    centerStart.setAlpha(alpha);
+                }
             }
         });
         hiddenAnimator.addListener(new Animator.AnimatorListener() {
@@ -453,7 +463,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 loadingView.setVisibility(View.GONE);
                 break;
             case PAUSE:
-                centerStart.setVisibility(View.GONE);
+                centerStart.setVisibility(View.VISIBLE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 break;
             case COMPLETE:
