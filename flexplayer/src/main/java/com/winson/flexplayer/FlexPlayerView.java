@@ -201,18 +201,27 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
+        try {
+            return mediaPlayer.isPlaying();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void play() {
         if (haveDataSource) {
-            if (!mediaPlayer.isPlaying()) {
-                mediaPlayer.start();
+            try {
+                if (!mediaPlayer.isPlaying()) {
+                    mediaPlayer.start();
+                }
+                currentState = State.PLAY;
+                controller.setCurrentState(currentState);
+                startUpdateProgress();
+                controller.setKeepScreenOn(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            currentState = State.PLAY;
-            controller.setCurrentState(currentState);
-            startUpdateProgress();
-            controller.setKeepScreenOn(true);
         }
     }
 
@@ -394,10 +403,12 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         bufferPercent = percent;
+//        Log.d(TAG,"onBufferingUpdate percent: " + percent);
     }
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
+//        Log.d(TAG, "onInfo state --> what : " + what + " , extra ");
         switch (what) {
             // 播放器开始渲染
             case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
@@ -413,7 +424,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 controller.setCurrentState(currentState);
                 break;
         }
-        return false;
+        return true;
     }
 
 }

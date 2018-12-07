@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     String TEST_PATH3 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/apeng/test.mp4";
     String TEST_PATH4 = "https://dakaimg.ciweilive.com/erp_114C13721DB0A5B4D8DFE7AB71A48026.mp4";
     String TEST_PATH5 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/document/video:14";
+    String TEST_PATH6 = "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super";
 
     @Override
     public void onBackPressed() {
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flexPlayerView.setUp(v.getContext(), TEST_PATH);
+                flexPlayerView.setUp(v.getContext(), TEST_PATH6);
             }
         });
 
