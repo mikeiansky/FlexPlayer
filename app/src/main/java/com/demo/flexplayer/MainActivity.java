@@ -1,8 +1,12 @@
 package com.demo.flexplayer;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.VideoView;
@@ -32,6 +36,17 @@ public class MainActivity extends AppCompatActivity {
     FlexPlayerView flexPlayerView;
     VideoView videoView;
 
+    /**
+     * 检查wifi是否处开连接状态
+     *
+     * @return
+     */
+    public boolean isWifiConnect() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWifiInfo.isConnected();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flexPlayerView.setUp(v.getContext(), TEST_PATH6);
+                flexPlayerView.setUp(v.getContext(), TEST_PATH);
             }
         });
 
@@ -52,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 flexPlayerView.setUp(v.getContext(), TEST_PATH2);
-
             }
         });
 
@@ -75,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 //        flexPlayerView.getController().showBackImage(true);
 
 //        flexPlayerView.setContainerBackground(getResources().getDrawable(R.drawable.white_background));
-
+        Log.d("TAG", "is wificonnect : " + isWifiConnect());
 
     }
 }

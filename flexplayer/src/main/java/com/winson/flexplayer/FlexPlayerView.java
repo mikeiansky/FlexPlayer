@@ -53,6 +53,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         return controller;
     }
 
+    public String getVideoPath() {
+        return videoPath;
+    }
+
     public FlexPlayerView(Context context) {
         super(context);
         init(context, null, 0, 0);
@@ -330,7 +334,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public void setUp(Context context, String path) {
         videoPath = path;
-        currentState = State.NONE;
+        currentState = State.SETUP;
         controller.setCurrentState(currentState);
     }
 

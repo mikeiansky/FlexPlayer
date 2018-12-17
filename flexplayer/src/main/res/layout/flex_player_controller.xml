@@ -259,12 +259,33 @@
 
     <!--中间开始播放按钮-->
 
-    <ImageView
-        android:id="@+id/center_start"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="@drawable/ic_player_center_start"
-        android:visibility="visible" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/no_wifi_notify_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="70dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:text="@string/wifi_not_connect_notify"
+            android:textColor="#ffffff"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/center_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_player_center_start"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
 
 </RelativeLayout>

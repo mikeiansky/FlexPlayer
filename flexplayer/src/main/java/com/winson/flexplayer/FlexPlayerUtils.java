@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.WindowManager;
 
 import java.util.Formatter;
@@ -97,6 +99,12 @@ public class FlexPlayerUtils {
         } else {
             return mFormatter.format("%02d:%02d", minutes, seconds).toString();
         }
+    }
+
+    public static boolean isWifiConnect(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWifiInfo.isConnected();
     }
 
 }

@@ -42,6 +42,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private View centerStart;
     private TextView positionTextView, durationTextView;
     private TextView titleTextView;
+    private TextView noWifiNotifyTextView;
     private SeekBar seekBar;
     private ImageView restartOrPause;
     private boolean seekBarOnTouch;
@@ -107,6 +108,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         content.setLayoutParams(lp);
         addView(content);
 
+        noWifiNotifyTextView = content.findViewById(R.id.no_wifi_notify_tv);
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         changeContainer = content.findViewById(R.id.change_position);
         changePositionCurrent = content.findViewById(R.id.change_position_current);
@@ -372,7 +374,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 }
             }
         } else if (id == R.id.center_start) {
-            if (currentState == FlexPlayer.State.NONE) {
+            if (currentState == FlexPlayer.State.NONE || currentState == FlexPlayer.State.SETUP) {
                 if (flexPlayer != null) {
                     flexPlayer.start();
                 }
@@ -442,6 +444,18 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     public void setCurrentState(FlexPlayer.State state) {
         switch (state) {
+            case SETUP:
+                // check wifi connect
+                String videoPath = flexPlayer.getVideoPath();
+                if (videoPath != null && videoPath.startsWith("http")) {
+                    boolean isWifiConnect = FlexPlayerUtils.isWifiConnect(getContext());
+                    if (!isWifiConnect) {
+                        // need show notify
+                        noWifiNotifyTextView.setVisibility(View.VISIBLE);
+                    } else {
+                        noWifiNotifyTextView.setVisibility(View.GONE);
+                    }
+                }
             case NONE:
                 centerStart.setVisibility(View.VISIBLE);
                 coverImage.setVisibility(View.VISIBLE);
@@ -450,6 +464,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 break;
             case PREPARE:
             case BUFFER_START:
+                noWifiNotifyTextView.setVisibility(View.GONE);
                 centerStart.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
                 break;
@@ -457,6 +472,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 loadingView.setVisibility(View.GONE);
                 break;
             case PLAY:
+                noWifiNotifyTextView.setVisibility(View.GONE);
                 centerStart.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_pause);
                 coverImage.setVisibility(View.GONE);

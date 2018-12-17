@@ -9,7 +9,7 @@ import android.content.Context;
 public interface FlexPlayer {
 
     enum State {
-        NONE, PREPARE, PAUSE, PLAY, BUFFER_START, BUFFER_END, COMPLETE
+        SETUP,NONE, PREPARE, PAUSE, PLAY, BUFFER_START, BUFFER_END, COMPLETE
     }
 
     enum Mode {
@@ -111,5 +111,12 @@ public interface FlexPlayer {
      * @return
      */
     boolean onBackPressed();
+
+    /**
+     * 获取当前播放的路径
+     *
+     * @return 当前播放的路径
+     */
+    String getVideoPath();
 
 }
