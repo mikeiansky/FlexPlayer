@@ -464,6 +464,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 break;
             case PREPARE:
             case BUFFER_START:
+                coverImage.setVisibility(View.GONE);
                 noWifiNotifyTextView.setVisibility(View.GONE);
                 centerStart.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
@@ -484,8 +485,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 break;
             case COMPLETE:
                 centerStart.setVisibility(View.VISIBLE);
+                coverImage.setVisibility(View.VISIBLE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 loadingView.setVisibility(View.GONE);
+                if (!onAnimator) {
+                    if (!onHidden) {
+                        hiddenAnimator.start();
+                    }
+                }
                 break;
         }
         currentState = state;
