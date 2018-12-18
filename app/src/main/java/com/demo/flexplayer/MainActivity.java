@@ -1,6 +1,7 @@
 package com.demo.flexplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -70,18 +71,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.size).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.list).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                flexPlayerView.setUp(v.getContext(), TEST_PATH3);
-
 //                videoView.setVideoURI(Uri.parse(TEST_PATH4));
-                videoView.setVideoPath(TEST_PATH5);
-                videoView.start();
+//                videoView.setVideoPath(TEST_PATH5);
+//                videoView.start();
+
+                Intent intent = new Intent(MainActivity.this, ListVideoActivity.class);
+                startActivity(intent);
+
 
             }
         });
-
+        flexPlayerView.getController().showBackImage(true);
         flexPlayerView.setUp(this, TEST_PATH4);
 //        flexPlayerView.setUp(this, TEST_PATH);
 //        flexPlayerView.start();

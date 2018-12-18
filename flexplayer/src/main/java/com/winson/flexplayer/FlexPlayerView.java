@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
-import java.io.IOException;
 
 /**
  * @date on 2018/12/4
@@ -41,6 +39,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private int bufferPercent;
     private int videoWidth;
     private int videoHeight;
+    private Surface playerSurface;
 
     private Runnable updateProgressRunnable = new Runnable() {
         @Override
@@ -82,7 +81,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         container.setBackground(drawable);
     }
 
-    private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnVideoSizeChangedListener(this);
@@ -90,6 +89,13 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnBufferingUpdateListener(this);
         mediaPlayer.setOnInfoListener(this);
+        if (playerSurface != null) {
+            mediaPlayer.setSurface(playerSurface);
+        }
+    }
+
+    private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        initMediaPlayer();
 
         container = new FrameLayout(getContext());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -101,8 +107,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
                 if (surfaceTexture == null) {
                     surfaceTexture = surface;
-                    Surface s = new Surface(surfaceTexture);
-                    mediaPlayer.setSurface(s);
+                    playerSurface = new Surface(surfaceTexture);
+                    if (mediaPlayer != null) {
+                        mediaPlayer.setSurface(playerSurface);
+                    }
                 } else {
                     textureView.setSurfaceTexture(surfaceTexture);
                 }
@@ -137,10 +145,11 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        release();
+        FlexPlayerManager.instance().releaseFlexPlayer(this);
     }
 
-    private void release() {
+    @Override
+    public void release() {
         removeUpdateProgress();
         try {
             if (mediaPlayer != null) {
@@ -149,6 +158,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 }
                 mediaPlayer.reset();
                 mediaPlayer.release();
+                mediaPlayer = null;
+                currentState = State.NONE;
+                controller.setCurrentState(currentState);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,11 +187,17 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public int getPosition() {
+        if (mediaPlayer == null) {
+            return -1;
+        }
         return mediaPlayer.getCurrentPosition();
     }
 
     @Override
     public int getDuration() {
+        if (mediaPlayer == null) {
+            return -1;
+        }
         return mediaPlayer.getDuration();
     }
 
@@ -190,6 +208,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void seekTo(int mesc) {
+        if (mediaPlayer == null) {
+            return;
+        }
         mediaPlayer.seekTo(mesc);
     }
 
@@ -206,7 +227,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     @Override
     public boolean isPlaying() {
         try {
-            return mediaPlayer.isPlaying();
+            if (mediaPlayer != null) {
+                return mediaPlayer.isPlaying();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -214,7 +237,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     public void play() {
-        if (haveDataSource) {
+        if (haveDataSource && mediaPlayer != null) {
             try {
                 if (!mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
@@ -231,7 +254,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
     @Override
     public void pause() {
-        if (haveDataSource) {
+        if (haveDataSource && mediaPlayer != null) {
             try {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
@@ -252,6 +275,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
             return;
         }
         try {
+            if (mediaPlayer == null) {
+                initMediaPlayer();
+            }
+            FlexPlayerManager.instance().setCurrentFlexPlayer(this);
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
             }
