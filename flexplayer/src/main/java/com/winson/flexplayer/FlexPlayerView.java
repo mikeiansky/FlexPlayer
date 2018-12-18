@@ -143,12 +143,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        FlexPlayerManager.instance().releaseFlexPlayer(this);
-    }
-
-    @Override
     public void release() {
         removeUpdateProgress();
         try {
