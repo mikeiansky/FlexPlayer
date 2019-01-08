@@ -65,6 +65,63 @@
             android:progressDrawable="@drawable/pb_change" />
     </LinearLayout>
 
+    <!--改变亮度-->
+    <LinearLayout
+        android:id="@+id/change_brightness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_radius_4"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_palyer_brightness" />
+
+        <ProgressBar
+            android:id="@+id/change_brightness_progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="100dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:max="100"
+            android:progressDrawable="@drawable/pb_change" />
+
+    </LinearLayout>
+    <!--改变声音-->
+    <LinearLayout
+        android:id="@+id/change_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_radius_4"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_palyer_volume" />
+
+        <ProgressBar
+            android:id="@+id/change_volume_progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="100dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:max="100"
+            android:progressDrawable="@drawable/pb_change" />
+
+    </LinearLayout>
+
     <!--播放完成-->
     <LinearLayout
         android:id="@+id/completed"

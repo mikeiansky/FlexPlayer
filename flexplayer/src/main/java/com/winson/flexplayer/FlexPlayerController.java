@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -16,6 +17,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -55,6 +57,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private View changeContainer;
     private ProgressBar changePositionProgress;
     private ImageView backImage;
+
+    private LinearLayout changeBrightness;
+    private ProgressBar changeBrightnessProgress;
+
+    private LinearLayout changeVolume;
+    private ProgressBar changeVolumeProgress;
+
+    private int gestureDownVolume;
     private float downX;
     private float downY;
     private boolean isMove;
@@ -64,6 +74,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private float touchSlop;
     private int startPosition;
     private int seekToProgress;
+    private AudioManager audioManager;
     private Handler handler = new Handler();
     private Runnable hiddenTopAndBottomRunnable = new Runnable() {
         @Override
@@ -94,6 +105,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,6 +122,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        changeBrightness = content.findViewById(R.id.change_brightness);
+        changeBrightnessProgress = content.findViewById(R.id.change_brightness_progress);
+
+        changeVolume = content.findViewById(R.id.change_volume);
+        changeVolumeProgress = content.findViewById(R.id.change_volume_progress);
 
         noWifiNotifyTextView = content.findViewById(R.id.no_wifi_notify_tv);
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
@@ -314,6 +332,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     onLeft = true;
                 } else if (downX > getWidth() * 0.8f) {
                     onRight = true;
+                    gestureDownVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 } else {
                     onCenter = true;
                 }
@@ -330,7 +349,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                         if (onLeft) {
 
                         } else if (onRight) {
-
+                            changeVolume.setVisibility(View.VISIBLE);
                         } else {
                             changeContainer.setVisibility(View.VISIBLE);
                             seekBarOnTouch = true;
@@ -340,6 +359,16 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     if (onLeft) {
 
                     } else if (onRight) {
+                        float deltaY = -(cy - downY);
+
+                        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                        int deltaVolume = (int) (maxVolume * deltaY / getHeight());
+                        int newVolume = gestureDownVolume + deltaVolume;
+                        newVolume = Math.max(0, Math.min(maxVolume, newVolume));
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, AudioManager.FLAG_PLAY_SOUND);
+
+                        int newVolumeProgress = (int) (100f * newVolume / maxVolume);
+                        changeVolumeProgress.setProgress(newVolumeProgress);
 
                     } else {
                         int width = getWidth();
@@ -384,6 +413,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     if (onLeft) {
 
                     } else if (onRight) {
+                        changeVolume.setVisibility(View.GONE);
 
                     } else {
                         flexPlayer.seekTo(seekToProgress);
