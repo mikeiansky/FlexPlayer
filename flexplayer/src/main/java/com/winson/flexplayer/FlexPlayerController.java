@@ -58,6 +58,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private float downX;
     private float downY;
     private boolean isMove;
+    private boolean onCenter;
+    private boolean onLeft;
+    private boolean onRight;
     private float touchSlop;
     private int startPosition;
     private int seekToProgress;
@@ -304,44 +307,66 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 clearHiddenRunnable();
-                downX = event.getRawX();
-                downY = event.getRawY();
+                downX = event.getX();
+                downY = event.getY();
+                // is left or right
+                if (downX < getWidth() * 0.2f) {
+                    onLeft = true;
+                } else if (downX > getWidth() * 0.8f) {
+                    onRight = true;
+                } else {
+                    onCenter = true;
+                }
+
                 isMove = false;
                 startPosition = flexPlayer.getPosition();
                 break;
             case MotionEvent.ACTION_MOVE:
-                float cx = event.getRawX();
-                float cy = event.getRawY();
+                float cx = event.getX();
+                float cy = event.getY();
                 if (!isMove) {
                     if (Math.abs(cx - downX) > touchSlop || Math.abs(cy - downY) > touchSlop) {
                         isMove = true;
-                        changeContainer.setVisibility(View.VISIBLE);
-                        seekBarOnTouch = true;
+                        if (onLeft) {
+
+                        } else if (onRight) {
+
+                        } else {
+                            changeContainer.setVisibility(View.VISIBLE);
+                            seekBarOnTouch = true;
+                        }
                     }
                 } else {
-                    int width = getWidth();
-                    float offsetX = cx - downX;
-                    float rate = offsetX / width;
-                    int duration = flexPlayer.getDuration();
-                    float offsetProgress = rate * duration;
-                    float targetProgress = offsetProgress + startPosition;
-                    if (targetProgress < 0) {
-                        targetProgress = 0;
-                        startPosition = 0;
-                        downX = cx;
+                    if (onLeft) {
+
+                    } else if (onRight) {
+
+                    } else {
+                        int width = getWidth();
+                        float offsetX = cx - downX;
+                        float rate = offsetX / width;
+                        int duration = flexPlayer.getDuration();
+                        float offsetProgress = rate * duration;
+                        float targetProgress = offsetProgress + startPosition;
+                        if (targetProgress < 0) {
+                            targetProgress = 0;
+                            startPosition = 0;
+                            downX = cx;
+                        }
+                        if (targetProgress > duration) {
+                            targetProgress = duration;
+                            startPosition = duration;
+                            downX = cx;
+                        }
+                        String positionText = FlexPlayerUtils.formatTime((long) targetProgress);
+                        positionTextView.setText(positionText);
+                        changePositionCurrent.setText(positionText);
+                        int progress = (int) (100f * targetProgress / duration);
+                        seekBar.setProgress(progress);
+                        changePositionProgress.setProgress(progress);
+                        seekToProgress = (int) targetProgress;
                     }
-                    if (targetProgress > duration) {
-                        targetProgress = duration;
-                        startPosition = duration;
-                        downX = cx;
-                    }
-                    String positionText = FlexPlayerUtils.formatTime((long) targetProgress);
-                    positionTextView.setText(positionText);
-                    changePositionCurrent.setText(positionText);
-                    int progress = (int) (100f * targetProgress / duration);
-                    seekBar.setProgress(progress);
-                    changePositionProgress.setProgress(progress);
-                    seekToProgress = (int) targetProgress;
+
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -356,9 +381,18 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     }
                 } else {
                     hiddenTopAndBottomDelay();
-                    flexPlayer.seekTo(seekToProgress);
+                    if (onLeft) {
+
+                    } else if (onRight) {
+
+                    } else {
+                        flexPlayer.seekTo(seekToProgress);
+                    }
                 }
 
+                onRight = false;
+                onLeft = false;
+                onCenter = false;
                 seekBarOnTouch = false;
                 changeContainer.setVisibility(View.GONE);
                 break;
