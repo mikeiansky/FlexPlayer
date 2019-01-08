@@ -1,1 +1,4 @@
-include ':app', ':flexplayer'
+include ':app', ':ijk:ijkplayer-x86', ':ijk:ijkplayer-armv5', ':ijk:ijkplayer-armv7a', ':ijk:ijkplayer-x86_64', ':ijk:ijkplayer-arm64'
+include ':flexplayer'
+include ':ijk:ijkplayer-java'
+include ':ijk:ijkplayer-exo'
