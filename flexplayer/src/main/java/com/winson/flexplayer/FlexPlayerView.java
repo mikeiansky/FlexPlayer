@@ -93,7 +93,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
     private void initMediaPlayer() {
         mediaPlayer = new IjkMediaPlayer();
         mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnVideoSizeChangedListener(this);
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnBufferingUpdateListener(this);
@@ -104,7 +103,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        initMediaPlayer();
 
         container = new FrameLayout(getContext());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -127,6 +125,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
                     playerSurface = new Surface(surfaceTexture);
                     if (mediaPlayer != null) {
                         mediaPlayer.setSurface(playerSurface);
+                        mediaPlayer.setOnVideoSizeChangedListener(FlexPlayerView.this);
                     }
                 } else {
                     textureView.setSurfaceTexture(surfaceTexture);
@@ -292,8 +291,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
         }
         try {
             if (mediaPlayer == null) {
-                initTextureView();
                 initMediaPlayer();
+                initTextureView();
             }
             FlexPlayerManager.instance().setCurrentFlexPlayer(this);
             if (mediaPlayer.isPlaying()) {
@@ -335,14 +334,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
             controller.setCurrentMode(currentMode);
         }
 
-        controller.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                calculateSize();
-                controller.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            }
-        });
-
     }
 
     @Override
@@ -364,14 +355,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
             if (controller != null) {
                 controller.setCurrentMode(currentMode);
             }
-
-            controller.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    calculateSize();
-                    controller.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
-            });
         }
     }
 
@@ -403,20 +386,10 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
     }
 
     private void calculateSize() {
-        if (videoWidth <= 0 || videoHeight <= 0) {
+        if (videoWidth <= 0 || videoHeight <= 0 || textureView == null) {
             return;
         }
-        int maxWidth = container.getWidth();
-        int maxHeight = container.getHeight();
-        float wr = 1f * videoWidth / maxWidth;
-        float hr = 1f * videoHeight / maxHeight;
-        if (wr > hr) {
-            textureView.setOrientation(FlexTextureView.HORIZONTAL);
-            textureView.setRate(1f * videoHeight / videoWidth);
-        } else {
-            textureView.setOrientation(FlexTextureView.VERTICAL);
-            textureView.setRate(1f * videoWidth / videoHeight);
-        }
+        textureView.adaptVideoSize(videoWidth, videoHeight);
     }
 
     @Override

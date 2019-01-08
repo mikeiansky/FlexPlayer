@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        FlexPlayerManager.instance().releaseFlexPlayer();
     }
 
     FlexPlayerView flexPlayerView;
@@ -102,5 +101,11 @@ public class MainActivity extends AppCompatActivity {
 //        flexPlayerView.setContainerBackground(getResources().getDrawable(R.drawable.white_background));
         Log.d("TAG", "is wificonnect : " + isWifiConnect());
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlexPlayerManager.instance().releaseFlexPlayer();
     }
 }

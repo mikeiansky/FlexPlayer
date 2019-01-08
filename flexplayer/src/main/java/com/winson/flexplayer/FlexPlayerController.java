@@ -188,9 +188,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                onAnimator = false;
-                top.setVisibility(GONE);
-                bottom.setVisibility(GONE);
+                hiddenBar();
             }
 
             @Override
@@ -251,6 +249,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         restartOrPause.setOnClickListener(this);
 
         hiddenTopAndBottom();
+    }
+
+    private void hiddenBar() {
+        onAnimator = false;
+        onHidden = true;
+        top.setVisibility(GONE);
+        bottom.setVisibility(GONE);
+        clearHiddenRunnable();
     }
 
     private void clearHiddenRunnable() {
@@ -463,6 +469,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 coverImage.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
+                hiddenBar();
                 break;
             case PREPARE:
             case BUFFER_START:
