@@ -253,11 +253,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         hiddenTopAndBottom();
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-    }
-
     private void clearHiddenRunnable() {
         handler.removeCallbacks(hiddenTopAndBottomRunnable);
     }
@@ -275,6 +270,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     public void showBackImage(boolean show) {
         backImage.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    public void setUp(Context context, String path) {
+        if (flexPlayer != null) {
+            flexPlayer.release();
+            flexPlayer.setUp(context, path);
+        }
     }
 
     @Override

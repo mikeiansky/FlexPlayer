@@ -17,20 +17,27 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+
 
 /**
  * @date on 2018/12/4
  * @Author Winson
  */
-public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnVideoSizeChangedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnInfoListener {
+public class FlexPlayerView extends FrameLayout implements FlexPlayer,
+        IMediaPlayer.OnPreparedListener,
+        IMediaPlayer.OnVideoSizeChangedListener,
+        IMediaPlayer.OnCompletionListener,
+        IMediaPlayer.OnErrorListener,
+        IMediaPlayer.OnBufferingUpdateListener,
+        IMediaPlayer.OnInfoListener {
 
     public static final String TAG = FlexPlayerView.class.getSimpleName();
 
-    private MediaPlayer mediaPlayer;
-    private SurfaceTexture surfaceTexture;
+    private IMediaPlayer mediaPlayer;
     private FlexPlayerController controller;
     private FrameLayout container;
-    private FlexTextureView textureView;
     private Mode currentMode = Mode.NORMAL;
     private State currentState = State.NONE;
     private boolean haveDataSource;
@@ -39,6 +46,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     private int bufferPercent;
     private int videoWidth;
     private int videoHeight;
+    private FlexTextureView textureView;
+    private SurfaceTexture surfaceTexture;
     private Surface playerSurface;
 
     private Runnable updateProgressRunnable = new Runnable() {
@@ -82,7 +91,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     private void initMediaPlayer() {
-        mediaPlayer = new MediaPlayer();
+        mediaPlayer = new IjkMediaPlayer();
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnVideoSizeChangedListener(this);
         mediaPlayer.setOnCompletionListener(this);
@@ -101,6 +110,14 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         addView(container, lp);
 
+        container.setBackground(getResources().getDrawable(R.drawable.flex_video_black_bg));
+
+        controller = new FlexPlayerController(getContext());
+        setPlayerController(controller);
+
+    }
+
+    private void initTextureView() {
         textureView = new FlexTextureView(getContext());
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
@@ -132,14 +149,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
 
             }
         });
-        FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        LayoutParams tlp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         tlp.gravity = Gravity.CENTER;
-        container.addView(textureView, tlp);
-        container.setBackground(getResources().getDrawable(R.drawable.flex_video_black_bg));
-
-        controller = new FlexPlayerController(getContext());
-        setPlayerController(controller);
-
+        container.addView(textureView, 0, tlp);
     }
 
     @Override
@@ -152,6 +164,16 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
                 }
                 mediaPlayer.reset();
                 mediaPlayer.release();
+                if (surfaceTexture != null) {
+                    surfaceTexture.release();
+                    surfaceTexture = null;
+                }
+                if (playerSurface != null) {
+                    playerSurface.release();
+                    playerSurface = null;
+                }
+                container.removeView(textureView);
+                textureView = null;
                 mediaPlayer = null;
                 currentState = State.NONE;
                 controller.setCurrentState(currentState);
@@ -184,7 +206,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         if (mediaPlayer == null) {
             return -1;
         }
-        return mediaPlayer.getCurrentPosition();
+        return (int) mediaPlayer.getCurrentPosition();
     }
 
     @Override
@@ -192,7 +214,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         if (mediaPlayer == null) {
             return -1;
         }
-        return mediaPlayer.getDuration();
+        return (int) mediaPlayer.getDuration();
     }
 
     @Override
@@ -270,6 +292,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         }
         try {
             if (mediaPlayer == null) {
+                initTextureView();
                 initMediaPlayer();
             }
             FlexPlayerManager.instance().setCurrentFlexPlayer(this);
@@ -379,22 +402,6 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
         return false;
     }
 
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        mp.start();
-        currentState = State.PLAY;
-        controller.setCurrentState(currentState);
-        startUpdateProgress();
-    }
-
-    @Override
-    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-        videoWidth = width;
-        videoHeight = height;
-
-        calculateSize();
-    }
-
     private void calculateSize() {
         if (videoWidth <= 0 || videoHeight <= 0) {
             return;
@@ -413,7 +420,22 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
+    public void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int sar_num, int sar_den) {
+        videoWidth = width;
+        videoHeight = height;
+        calculateSize();
+    }
+
+    @Override
+    public void onPrepared(IMediaPlayer mp) {
+        mp.start();
+        currentState = State.PLAY;
+        controller.setCurrentState(currentState);
+        startUpdateProgress();
+    }
+
+    @Override
+    public void onCompletion(IMediaPlayer mp) {
         currentState = State.COMPLETE;
         controller.setCurrentState(currentState);
         removeUpdateProgress();
@@ -421,18 +443,18 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer, MediaPlay
     }
 
     @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
+    public boolean onError(IMediaPlayer mp, int what, int extra) {
         return false;
     }
 
     @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+    public void onBufferingUpdate(IMediaPlayer mp, int percent) {
         bufferPercent = percent;
 //        Log.d(TAG,"onBufferingUpdate percent: " + percent);
     }
 
     @Override
-    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+    public boolean onInfo(IMediaPlayer mp, int what, int extra) {
 //        Log.d(TAG, "onInfo state --> what : " + what + " , extra ");
         switch (what) {
             // 播放器开始渲染

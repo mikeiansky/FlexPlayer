@@ -27,4 +27,10 @@ dependencies {
 
 
     implementation project(":flexplayer")
+    implementation project(':ijk:ijkplayer-exo')
+    implementation project(':ijk:ijkplayer-java')
+    implementation project(':ijk:ijkplayer-x86')
+    implementation project(':ijk:ijkplayer-armv5')
+    implementation project(':ijk:ijkplayer-armv7a')
+
 }

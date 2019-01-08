@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.VideoView;
 
+import com.winson.flexplayer.FlexPlayerManager;
 import com.winson.flexplayer.FlexPlayerView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,12 @@ public class MainActivity extends AppCompatActivity {
         if (!flexPlayerView.onBackPressed()) {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        FlexPlayerManager.instance().releaseFlexPlayer();
     }
 
     FlexPlayerView flexPlayerView;
@@ -59,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flexPlayerView.setUp(v.getContext(), TEST_PATH);
+                flexPlayerView.getController().setUp(v.getContext(), TEST_PATH);
             }
         });
 
@@ -67,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         enterFullScreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                flexPlayerView.setUp(v.getContext(), TEST_PATH2);
+                flexPlayerView.getController().setUp(v.getContext(), TEST_PATH3);
             }
         });
 
@@ -86,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         flexPlayerView.getController().showBackImage(true);
-        flexPlayerView.setUp(this, TEST_PATH4);
+        flexPlayerView.getController().setUp(this, TEST_PATH4);
 //        flexPlayerView.setUp(this, TEST_PATH);
 //        flexPlayerView.start();
 //        flexPlayerView.enterFullScreen();
