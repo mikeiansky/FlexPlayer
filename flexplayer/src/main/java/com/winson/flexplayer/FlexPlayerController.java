@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -65,6 +66,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ProgressBar changeVolumeProgress;
 
     private int gestureDownVolume;
+    private float gestureDownBrightness;
     private float downX;
     private float downY;
     private boolean isMove;
@@ -347,7 +349,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     if (Math.abs(cx - downX) > touchSlop || Math.abs(cy - downY) > touchSlop) {
                         isMove = true;
                         if (onLeft) {
-
+                            gestureDownBrightness = FlexPlayerUtils.scanForActivity(getContext())
+                                    .getWindow().getAttributes().screenBrightness;
+                            changeBrightness.setVisibility(View.VISIBLE);
                         } else if (onRight) {
                             changeVolume.setVisibility(View.VISIBLE);
                         } else {
@@ -357,6 +361,18 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     }
                 } else {
                     if (onLeft) {
+                        float deltaY = -(cy - downY);
+
+                        float deltaBrightness = deltaY / getHeight();
+                        float newBrightness = gestureDownBrightness + deltaBrightness;
+                        newBrightness = Math.max(0, Math.min(newBrightness, 1));
+                        float newBrightnessPercentage = newBrightness;
+                        WindowManager.LayoutParams params = FlexPlayerUtils.scanForActivity(getContext())
+                                .getWindow().getAttributes();
+                        params.screenBrightness = newBrightnessPercentage;
+                        FlexPlayerUtils.scanForActivity(getContext()).getWindow().setAttributes(params);
+                        int newBrightnessProgress = (int) (100f * newBrightnessPercentage);
+                        changeBrightnessProgress.setProgress(newBrightnessProgress);
 
                     } else if (onRight) {
                         float deltaY = -(cy - downY);
@@ -411,10 +427,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 } else {
                     hiddenTopAndBottomDelay();
                     if (onLeft) {
-
+                        changeBrightness.setVisibility(View.GONE);
                     } else if (onRight) {
                         changeVolume.setVisibility(View.GONE);
-
                     } else {
                         flexPlayer.seekTo(seekToProgress);
                     }
