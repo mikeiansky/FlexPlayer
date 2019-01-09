@@ -79,6 +79,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ImageView batteryIV;
     private TextView timeTV;
 
+    private LinearLayout changeContent;
+
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
     private float gestureDownBrightness;
@@ -153,6 +155,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        changeContent = content.findViewById(R.id.change_content);
 
         batteryTimeLayout = content.findViewById(R.id.battery_time);
         batteryIV = content.findViewById(R.id.battery);
@@ -583,6 +587,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 hasRegisterBatteryReceiver = true;
             }
             startUpdateTime(mode);
+            changeContent.setVisibility(View.VISIBLE);
+            enterFullScreen.setVisibility(View.GONE);
         } else {
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
             batteryTimeLayout.setVisibility(View.GONE);
@@ -591,6 +597,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 hasRegisterBatteryReceiver = false;
             }
             stopUpdateTime();
+            changeContent.setVisibility(View.GONE);
+            enterFullScreen.setVisibility(View.VISIBLE);
         }
         currentMode = mode;
     }
