@@ -35,7 +35,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
 
     public static final String TAG = FlexPlayerView.class.getSimpleName();
 
-    private IMediaPlayer mediaPlayer;
+//    private IMediaPlayer mediaPlayer;
+    private IjkMediaPlayer mediaPlayer;
     private FlexPlayerController controller;
     private FrameLayout container;
     private Mode currentMode = Mode.NORMAL;
@@ -301,6 +302,8 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
             mediaPlayer.reset();
             mediaPlayer.setDataSource(getContext(), Uri.parse(videoPath));
             mediaPlayer.prepareAsync();
+//            mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "soundtouch", 1);
+//            mediaPlayer.setSpeed(2f);
             haveDataSource = true;
             currentState = State.PREPARE;
             controller.setCurrentState(currentState);
