@@ -645,6 +645,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         updateSpeed(flexPlayer.getSpeed());
     }
 
+    public boolean exitFullScreen() {
+        if (onShowSpeedContent) {
+            hiddenSpeedContentDelay(false);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();

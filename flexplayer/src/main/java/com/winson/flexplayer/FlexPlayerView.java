@@ -357,6 +357,9 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
     @Override
     public void exitFullScreen() {
         if (currentMode == Mode.FULL_SCREEN) {
+            if (controller != null && controller.exitFullScreen()) {
+                return;
+            }
             FlexPlayerUtils.showActionBar(getContext());
             FlexPlayerUtils.scanForActivity(getContext())
                     .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
