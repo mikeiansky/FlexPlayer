@@ -31,6 +31,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -38,6 +39,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * @date on 2018/12/4
@@ -90,9 +93,16 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private TextView timeTV;
 
     private LinearLayout changeContent;
+
+    // 倍速控制组件
     private View playerSpeed;
     private RadioGroup speedGroup;
     private RadioButton speedDotEight, speedOne, speedOneDotTwoFive, speedOneDotFive, speedTwo;
+
+    // 分辨率控制组件
+    private View resolutionContent;
+    private RecyclerView resolutionRecyclerView;
+    private FlexPlayerResolutionAdapter flexPlayerResolutionAdapter;
 
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
@@ -169,6 +179,33 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        resolutionContent = content.findViewById(R.id.resolution_content);
+        resolutionRecyclerView = content.findViewById(R.id.resolution_recycler_view);
+        flexPlayerResolutionAdapter = new FlexPlayerResolutionAdapter();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        resolutionRecyclerView.setLayoutManager(linearLayoutManager);
+        resolutionRecyclerView.setAdapter(flexPlayerResolutionAdapter);
+        flexPlayerResolutionAdapter.setOnItemClickListener(new FlexPlayerResolutionAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View child, int position, FlexPlayerResolution resolution) {
+                setUp(child.getContext(), resolution.getUrl());
+                if (flexPlayer != null) {
+                    flexPlayer.start();
+                }
+            }
+        });
+
+        ArrayList<FlexPlayerResolution> resolutions = new ArrayList<>();
+        TestResolution resolution1 = new TestResolution("1", "http://play.g3proxy.lecloud.com/vod/v2/MjUxLzE2LzgvbGV0di11dHMvMTQvdmVyXzAwXzIyLTExMDc2NDEzODctYXZjLTE5OTgxOS1hYWMtNDgwMDAtNTI2MTEwLTE3MDg3NjEzLWY1OGY2YzM1NjkwZTA2ZGFmYjg2MTVlYzc5MjEyZjU4LTE0OTg1NTc2ODY4MjMubXA0?b=259&mmsid=65565355&tm=1499247143&key=f0eadb4f30c404d49ff8ebad673d3742&platid=3&splatid=345&playid=0&tss=no&vtype=21&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "1080p");
+        TestResolution resolution2 = new TestResolution("2", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "720p");
+        TestResolution resolution3 = new TestResolution("3", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "480p");
+        TestResolution resolution4 = new TestResolution("4", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "360p");
+        resolutions.add(resolution1);
+        resolutions.add(resolution2);
+        resolutions.add(resolution3);
+        resolutions.add(resolution4);
+        flexPlayerResolutionAdapter.updateData(resolutions);
 
         speedDotEight = content.findViewById(R.id.dot_eight);
         speedOne = content.findViewById(R.id.one);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="player_speed_bg_selector">#40FFC80A</color>
+    <color name="content_background">#aa000000</color>
     <dimen name="top_bottom_bar_height">42dp</dimen>
     <dimen name="player_speed_content_width">200dp</dimen>
 

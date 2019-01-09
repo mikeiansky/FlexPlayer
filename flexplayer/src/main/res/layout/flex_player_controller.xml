@@ -122,6 +122,82 @@
 
     </LinearLayout>
 
+    <RadioGroup
+        android:id="@+id/speed_content"
+        android:layout_width="@dimen/player_speed_content_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/content_background"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/dot_eight"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="0.8X"
+            android:textColor="@color/player_text_color"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/one"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="1.0X"
+            android:textColor="@color/player_text_color"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/one_dot_two_five"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="1.25X"
+            android:textColor="@color/player_text_color"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/one_dot_five"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="1.5X"
+            android:textColor="@color/player_text_color"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/two"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="2X"
+            android:textColor="@color/player_text_color"
+            android:textSize="14sp" />
+
+    </RadioGroup>
+
+    <FrameLayout
+        android:id="@+id/resolution_content"
+        android:layout_width="@dimen/player_speed_content_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/content_background">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/resolution_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
+
     <!--播放完成-->
     <LinearLayout
         android:id="@+id/completed"
@@ -385,94 +461,5 @@
 
     </LinearLayout>
 
-    <RadioGroup
-        android:id="@+id/speed_content"
-        android:layout_width="@dimen/player_speed_content_width"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:background="#80000000"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <RadioButton
-            android:id="@+id/dot_eight"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:background="@drawable/player_speed_bg"
-            android:button="@null"
-            android:gravity="center"
-            android:text="0.8X"
-            android:textColor="@color/player_speed_color"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="#60ffffff" />
-
-        <RadioButton
-            android:id="@+id/one"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:background="@drawable/player_speed_bg"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.0X"
-            android:textColor="@color/player_speed_color"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="#60ffffff" />
-
-        <RadioButton
-            android:id="@+id/one_dot_two_five"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:background="@drawable/player_speed_bg"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.25X"
-            android:textColor="@color/player_speed_color"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="#60ffffff" />
-
-        <RadioButton
-            android:id="@+id/one_dot_five"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:background="@drawable/player_speed_bg"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.5X"
-            android:textColor="@color/player_speed_color"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="#60ffffff" />
-
-        <RadioButton
-            android:id="@+id/two"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:background="@drawable/player_speed_bg"
-            android:button="@null"
-            android:gravity="center"
-            android:text="2X"
-            android:textColor="@color/player_speed_color"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="#60ffffff" />
-    </RadioGroup>
 
 </RelativeLayout>
