@@ -100,9 +100,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private RadioButton speedDotEight, speedOne, speedOneDotTwoFive, speedOneDotFive, speedTwo;
 
     // 分辨率控制组件
+    private View resolutionFlag;
     private View resolutionContent;
     private RecyclerView resolutionRecyclerView;
     private FlexPlayerResolutionAdapter flexPlayerResolutionAdapter;
+    private ObjectAnimator showResolutionAnimator;
+    private ObjectAnimator hiddenResolutionAnimator;
+    private boolean onShowResolutionContent;
 
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
@@ -120,6 +124,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
     private AudioManager audioManager;
     private Handler handler = new Handler();
+
     private Runnable hiddenTopAndBottomRunnable = new Runnable() {
         @Override
         public void run() {
@@ -130,6 +135,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         @Override
         public void run() {
             hiddenSpeedContentAnimator.start();
+        }
+    };
+    private Runnable hiddenResolutionContentRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hiddenResolutionAnimator.start();
         }
     };
     private Runnable updateTimeRunnable = new Runnable() {
@@ -193,6 +204,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 if (flexPlayer != null) {
                     flexPlayer.start();
                 }
+                hiddenResolutionContentDelay(false);
             }
         });
 
@@ -235,6 +247,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         playerSpeed = content.findViewById(R.id.player_speed);
         playerSpeed.setOnClickListener(this);
 
+        resolutionFlag = content.findViewById(R.id.resolution_flag);
+        resolutionFlag.setOnClickListener(this);
+
         batteryTimeLayout = content.findViewById(R.id.battery_time);
         batteryIV = content.findViewById(R.id.battery);
         timeTV = content.findViewById(R.id.time);
@@ -253,6 +268,57 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         top = content.findViewById(R.id.top);
         bottom = content.findViewById(R.id.bottom);
+
+        showResolutionAnimator = ObjectAnimator.ofFloat(resolutionContent, "translationX", speedContentWidth, 0f);
+        showResolutionAnimator.setDuration(duration);
+        showResolutionAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowResolutionContent = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+                hiddenResolutionContentDelay(true);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        hiddenResolutionAnimator = ObjectAnimator.ofFloat(resolutionContent, "translationX", 0f, speedContentWidth);
+        hiddenResolutionAnimator.setDuration(duration);
+        hiddenResolutionAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowResolutionContent = false;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
 
         showSpeedContentAnimator = ObjectAnimator.ofFloat(speedGroup, "translationX", speedContentWidth, 0f);
         showSpeedContentAnimator.setDuration(duration);
@@ -440,6 +506,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         hiddenSpeedContent();
         hiddenBar();
+        hiddenResolutionContent();
     }
 
     private void showToolBar(boolean show) {
@@ -471,6 +538,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         speedGroup.setTranslationX(speedContentWidth);
     }
 
+    private void hiddenResolutionContent() {
+        resolutionContent.setTranslationX(speedContentWidth);
+    }
+
     private void hiddenBar() {
         onAnimator = false;
         onHidden = true;
@@ -495,6 +566,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             handler.postDelayed(hiddenSpeedContentRunnable, 5000);
         } else {
             hiddenSpeedContentRunnable.run();
+        }
+    }
+
+    private void hiddenResolutionContentDelay(boolean delay) {
+        handler.removeCallbacks(hiddenResolutionContentRunnable);
+        if (delay) {
+            handler.postDelayed(hiddenResolutionContentRunnable, 5000);
+        } else {
+            hiddenResolutionContentRunnable.run();
         }
     }
 
@@ -653,6 +733,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 if (!isMove) {
                     if (onShowSpeedContent) {
                         hiddenSpeedContentDelay(false);
+                    } else if (onShowResolutionContent) {
+                        hiddenResolutionContentDelay(false);
                     } else {
                         showToolBar(onHidden);
                     }
@@ -732,6 +814,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         } else if (id == R.id.player_speed) {
             showToolBar(false);
             showSpeedContentAnimator.start();
+        } else if (id == R.id.resolution_flag) {
+            showToolBar(false);
+            showResolutionAnimator.start();
         }
     }
 

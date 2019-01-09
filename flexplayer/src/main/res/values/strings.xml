@@ -8,5 +8,6 @@
 
     <string name="player_speed">倍速</string>
     <string name="player_list">选集</string>
+    <string name="resolution_type">标准</string>
 
 </resources>

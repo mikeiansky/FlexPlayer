@@ -393,14 +393,14 @@
                     android:textSize="14sp" />
 
                 <TextView
-                    android:id="@+id/player_list"
+                    android:id="@+id/resolution_flag"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:singleLine="true"
-                    android:text="@string/player_list"
+                    android:text="@string/resolution_type"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
