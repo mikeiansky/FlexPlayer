@@ -25,6 +25,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -59,11 +61,19 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ImageView restartOrPause;
     private boolean seekBarOnTouch;
     private View top, bottom;
+
     private ValueAnimator showAnimator;
     private ValueAnimator hiddenAnimator;
+    private ObjectAnimator showSpeedContentAnimator;
+    private ObjectAnimator hiddenSpeedContentAnimator;
+    private boolean onShowSpeedContent;
+    private int duration = 250;
+
     private boolean onAnimator;
     private boolean onHidden;
     private float barHeight;
+    private float speedContentWidth;
+
     private TextView changePositionCurrent;
     private View changeContainer;
     private ProgressBar changePositionProgress;
@@ -80,6 +90,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private TextView timeTV;
 
     private LinearLayout changeContent;
+    private View playerSpeed;
+    private RadioGroup speedGroup;
+    private RadioButton speedDotEight, speedOne, speedOneDotTwoFive, speedOneDotFive, speedTwo;
 
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
@@ -101,6 +114,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         @Override
         public void run() {
             hiddenAnimator.start();
+        }
+    };
+    private Runnable hiddenSpeedContentRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hiddenSpeedContentAnimator.start();
         }
     };
     private Runnable updateTimeRunnable = new Runnable() {
@@ -139,24 +158,45 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!onAnimator) {
-                    if (onHidden) {
-                        showAnimator.start();
-                    } else {
-                        hiddenAnimator.start();
-                    }
-                }
+                showToolBar(onHidden);
             }
         });
 
         barHeight = getResources().getDimension(R.dimen.top_bottom_bar_height);
+        speedContentWidth = getResources().getDimension(R.dimen.player_speed_content_width);
 
         View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
 
+        speedDotEight = content.findViewById(R.id.dot_eight);
+        speedOne = content.findViewById(R.id.one);
+        speedOneDotTwoFive = content.findViewById(R.id.one_dot_two_five);
+        speedOneDotFive = content.findViewById(R.id.one_dot_five);
+        speedTwo = content.findViewById(R.id.two);
+
+        speedGroup = content.findViewById(R.id.speed_content);
+        speedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.dot_eight) {
+                    flexPlayer.setSpeed(0.8f);
+                } else if (checkedId == R.id.one) {
+                    flexPlayer.setSpeed(1f);
+                } else if (checkedId == R.id.one_dot_two_five) {
+                    flexPlayer.setSpeed(1.25f);
+                } else if (checkedId == R.id.one_dot_five) {
+                    flexPlayer.setSpeed(1.5f);
+                } else if (checkedId == R.id.two) {
+                    flexPlayer.setSpeed(2f);
+                }
+            }
+        });
+
         changeContent = content.findViewById(R.id.change_content);
+        playerSpeed = content.findViewById(R.id.player_speed);
+        playerSpeed.setOnClickListener(this);
 
         batteryTimeLayout = content.findViewById(R.id.battery_time);
         batteryIV = content.findViewById(R.id.battery);
@@ -177,14 +217,65 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         top = content.findViewById(R.id.top);
         bottom = content.findViewById(R.id.bottom);
 
+        showSpeedContentAnimator = ObjectAnimator.ofFloat(speedGroup, "translationX", speedContentWidth, 0f);
+        showSpeedContentAnimator.setDuration(duration);
+        showSpeedContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowSpeedContent = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+                hiddenSpeedContentDelay(true);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        hiddenSpeedContentAnimator = ObjectAnimator.ofFloat(speedGroup, "translationX", 0f, speedContentWidth);
+        hiddenSpeedContentAnimator.setDuration(duration);
+        hiddenSpeedContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowSpeedContent = false;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
         showAnimator = ValueAnimator.ofFloat(0f, 1f);
-        showAnimator.setDuration(250);
+        showAnimator.setDuration(duration);
         showAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float alpha = (float) animation.getAnimatedValue();
-//                top.setAlpha(alpha);
-//                bottom.setAlpha(alpha);
 
                 float ra = 1 - alpha;
                 top.setTranslationY(-ra * barHeight);
@@ -200,8 +291,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
                 onHidden = false;
-//                top.setVisibility(VISIBLE);
-//                bottom.setVisibility(VISIBLE);
                 if (currentState == FlexPlayer.State.PLAY) {
                     hiddenTopAndBottomDelay();
                 } else {
@@ -212,8 +301,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationEnd(Animator animation) {
                 onAnimator = false;
-//                top.setVisibility(VISIBLE);
-//                bottom.setVisibility(VISIBLE);
             }
 
             @Override
@@ -229,7 +316,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         });
 
         hiddenAnimator = ValueAnimator.ofFloat(1f, 0f);
-        hiddenAnimator.setDuration(250);
+        hiddenAnimator.setDuration(duration);
         hiddenAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -314,7 +401,18 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         restartOrPause = content.findViewById(R.id.restart_or_pause);
         restartOrPause.setOnClickListener(this);
 
+        hiddenSpeedContent();
         hiddenBar();
+    }
+
+    private void showToolBar(boolean show) {
+        if (!onAnimator) {
+            if (show && onHidden) {
+                showAnimator.start();
+            } else if (!show && !onHidden) {
+                hiddenAnimator.start();
+            }
+        }
     }
 
     private void startUpdateTime(FlexPlayer.Mode mode) {
@@ -330,6 +428,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void stopUpdateTime() {
         handler.removeCallbacks(updateTimeRunnable);
         onUpdateTime = false;
+    }
+
+    private void hiddenSpeedContent() {
+        speedGroup.setTranslationX(speedContentWidth);
     }
 
     private void hiddenBar() {
@@ -348,6 +450,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void hiddenTopAndBottomDelay() {
         handler.removeCallbacks(hiddenTopAndBottomRunnable);
         handler.postDelayed(hiddenTopAndBottomRunnable, 5000);
+    }
+
+    private void hiddenSpeedContentDelay(boolean delay) {
+        handler.removeCallbacks(hiddenSpeedContentRunnable);
+        if (delay) {
+            handler.postDelayed(hiddenSpeedContentRunnable, 5000);
+        } else {
+            hiddenSpeedContentRunnable.run();
+        }
     }
 
     public void showBackImage(boolean show) {
@@ -503,12 +614,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             case MotionEvent.ACTION_UP:
                 // 点击事件
                 if (!isMove) {
-                    if (!onAnimator) {
-                        if (onHidden) {
-                            showAnimator.start();
-                        } else {
-                            hiddenAnimator.start();
-                        }
+                    if (onShowSpeedContent) {
+                        hiddenSpeedContentDelay(false);
+                    } else {
+                        showToolBar(onHidden);
                     }
                 } else {
                     hiddenTopAndBottomDelay();
@@ -533,6 +642,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     public void setFlexPlayer(FlexPlayer flexPlayer) {
         this.flexPlayer = flexPlayer;
+        updateSpeed(flexPlayer.getSpeed());
     }
 
     @Override
@@ -574,6 +684,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             if (flexPlayer != null && currentMode == FlexPlayer.Mode.FULL_SCREEN) {
                 flexPlayer.exitFullScreen();
             }
+        } else if (id == R.id.player_speed) {
+            showToolBar(false);
+            showSpeedContentAnimator.start();
         }
     }
 
@@ -623,6 +736,20 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         stopUpdateTime();
+    }
+
+    private void updateSpeed(float speed) {
+        if (speed == 0.8f) {
+            speedGroup.check(R.id.dot_eight);
+        } else if (speed == 1.25f) {
+            speedGroup.check(R.id.one_dot_two_five);
+        } else if (speed == 1.5f) {
+            speedGroup.check(R.id.one_dot_five);
+        } else if (speed == 2f) {
+            speedGroup.check(R.id.two);
+        } else {
+            speedGroup.check(R.id.one);
+        }
     }
 
     public void updateProgress() {
@@ -676,6 +803,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_pause);
                 coverImage.setVisibility(View.GONE);
                 loadingView.setVisibility(View.GONE);
+                updateSpeed(flexPlayer.getSpeed());
                 break;
             case PAUSE:
                 centerStart.setVisibility(View.VISIBLE);
@@ -686,11 +814,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 coverImage.setVisibility(View.VISIBLE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
                 loadingView.setVisibility(View.GONE);
-                if (!onAnimator) {
-                    if (!onHidden) {
-                        hiddenAnimator.start();
-                    }
-                }
+                showToolBar(false);
                 break;
         }
         currentState = state;

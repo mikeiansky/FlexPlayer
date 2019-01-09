@@ -124,4 +124,18 @@ public interface FlexPlayer {
      */
     void release();
 
+    /**
+     * 获取当前的播放倍速
+     *
+     * @return
+     */
+    float getSpeed();
+
+    /**
+     * 设置当前播放器播放倍速
+     *
+     * @param speed 倍速
+     */
+    void setSpeed(float speed);
+
 }

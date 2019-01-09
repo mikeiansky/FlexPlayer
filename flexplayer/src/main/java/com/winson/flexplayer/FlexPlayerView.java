@@ -35,7 +35,7 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
 
     public static final String TAG = FlexPlayerView.class.getSimpleName();
 
-//    private IMediaPlayer mediaPlayer;
+    //    private IMediaPlayer mediaPlayer;
     private IjkMediaPlayer mediaPlayer;
     private FlexPlayerController controller;
     private FrameLayout container;
@@ -182,6 +182,21 @@ public class FlexPlayerView extends FrameLayout implements FlexPlayer,
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public float getSpeed() {
+        if (mediaPlayer != null) {
+            return mediaPlayer.getSpeed(1f);
+        }
+        return 1;
+    }
+
+    @Override
+    public void setSpeed(float speed) {
+        if (mediaPlayer != null) {
+            mediaPlayer.setSpeed(speed);
+        }
     }
 
     private void startUpdateProgress() {
