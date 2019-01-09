@@ -3,8 +3,12 @@ package com.winson.flexplayer;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -65,6 +69,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private LinearLayout changeVolume;
     private ProgressBar changeVolumeProgress;
 
+    private LinearLayout batteryTimeLayout;
+    private ImageView batteryIV;
+    private TextView timeTV;
+
+    private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
     private float gestureDownBrightness;
     private float downX;
@@ -124,6 +133,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        batteryTimeLayout = content.findViewById(R.id.battery_time);
+        batteryIV = content.findViewById(R.id.battery);
+        timeTV = content.findViewById(R.id.time);
 
         changeBrightness = content.findViewById(R.id.change_brightness);
         changeBrightnessProgress = content.findViewById(R.id.change_brightness_progress);
@@ -307,6 +320,39 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             flexPlayer.setUp(context, path);
         }
     }
+
+    /**
+     * 电池状态即电量变化广播接收器
+     */
+    private BroadcastReceiver batterReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+                    BatteryManager.BATTERY_STATUS_UNKNOWN);
+            if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                // 充电中
+                batteryIV.setImageResource(R.drawable.battery_charging);
+            } else if (status == BatteryManager.BATTERY_STATUS_FULL) {
+                // 充电完成
+                batteryIV.setImageResource(R.drawable.battery_full);
+            } else {
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+                int percentage = (int) (((float) level / scale) * 100);
+                if (percentage <= 10) {
+                    batteryIV.setImageResource(R.drawable.battery_10);
+                } else if (percentage <= 20) {
+                    batteryIV.setImageResource(R.drawable.battery_20);
+                } else if (percentage <= 50) {
+                    batteryIV.setImageResource(R.drawable.battery_50);
+                } else if (percentage <= 80) {
+                    batteryIV.setImageResource(R.drawable.battery_80);
+                } else if (percentage <= 100) {
+                    batteryIV.setImageResource(R.drawable.battery_100);
+                }
+            }
+        }
+    };
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -494,8 +540,19 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     public void setCurrentMode(FlexPlayer.Mode mode) {
         if (mode == FlexPlayer.Mode.FULL_SCREEN) {
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_shrink);
+            batteryTimeLayout.setVisibility(View.VISIBLE);
+            if (!hasRegisterBatteryReceiver) {
+                getContext().registerReceiver(batterReceiver,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                hasRegisterBatteryReceiver = true;
+            }
         } else {
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
+            batteryTimeLayout.setVisibility(View.GONE);
+            if (hasRegisterBatteryReceiver) {
+                getContext().unregisterReceiver(batterReceiver);
+                hasRegisterBatteryReceiver = false;
+            }
         }
         currentMode = mode;
     }
