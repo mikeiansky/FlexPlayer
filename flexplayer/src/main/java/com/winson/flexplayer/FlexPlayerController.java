@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -62,6 +63,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ValueAnimator hiddenAnimator;
     private boolean onAnimator;
     private boolean onHidden;
+    private float barHeight;
     private TextView changePositionCurrent;
     private View changeContainer;
     private ProgressBar changePositionProgress;
@@ -144,6 +146,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 }
             }
         });
+
+        barHeight = getResources().getDimension(R.dimen.top_bottom_bar_height);
+
         View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
@@ -174,8 +179,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float alpha = (float) animation.getAnimatedValue();
-                top.setAlpha(alpha);
-                bottom.setAlpha(alpha);
+//                top.setAlpha(alpha);
+//                bottom.setAlpha(alpha);
+
+                float ra = 1 - alpha;
+                top.setTranslationY(-ra * barHeight);
+                bottom.setTranslationY(ra * barHeight);
+
                 if (currentState == FlexPlayer.State.PAUSE) {
                     centerStart.setAlpha(alpha);
                 }
@@ -186,8 +196,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
                 onHidden = false;
-                top.setVisibility(VISIBLE);
-                bottom.setVisibility(VISIBLE);
+//                top.setVisibility(VISIBLE);
+//                bottom.setVisibility(VISIBLE);
                 if (currentState == FlexPlayer.State.PLAY) {
                     hiddenTopAndBottomDelay();
                 } else {
@@ -198,8 +208,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationEnd(Animator animation) {
                 onAnimator = false;
-                top.setVisibility(VISIBLE);
-                bottom.setVisibility(VISIBLE);
+//                top.setVisibility(VISIBLE);
+//                bottom.setVisibility(VISIBLE);
             }
 
             @Override
@@ -220,8 +230,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float alpha = (float) animation.getAnimatedValue();
-                top.setAlpha(alpha);
-                bottom.setAlpha(alpha);
+
+                float ra = 1 - alpha;
+                top.setTranslationY(-ra * barHeight);
+                bottom.setTranslationY(ra * barHeight);
+
                 if (currentState == FlexPlayer.State.PAUSE) {
                     centerStart.setAlpha(alpha);
                 }
@@ -232,8 +245,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
                 onHidden = true;
-                top.setVisibility(VISIBLE);
-                bottom.setVisibility(VISIBLE);
                 clearHiddenRunnable();
             }
 
@@ -299,7 +310,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         restartOrPause = content.findViewById(R.id.restart_or_pause);
         restartOrPause.setOnClickListener(this);
 
-        hiddenTopAndBottom();
+        hiddenBar();
     }
 
     private void startUpdateTime(FlexPlayer.Mode mode) {
@@ -320,8 +331,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void hiddenBar() {
         onAnimator = false;
         onHidden = true;
-        top.setVisibility(GONE);
-        bottom.setVisibility(GONE);
+        top.setTranslationY(-barHeight);
+        bottom.setTranslationY(barHeight);
+
         clearHiddenRunnable();
     }
 
@@ -332,12 +344,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void hiddenTopAndBottomDelay() {
         handler.removeCallbacks(hiddenTopAndBottomRunnable);
         handler.postDelayed(hiddenTopAndBottomRunnable, 5000);
-    }
-
-    private void hiddenTopAndBottom() {
-        onHidden = true;
-        top.setVisibility(View.GONE);
-        bottom.setVisibility(View.GONE);
     }
 
     public void showBackImage(boolean show) {

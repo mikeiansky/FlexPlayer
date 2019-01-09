@@ -5,4 +5,8 @@
     <string name="flex_player_play_error_notify">播放错误，请重试。</string>
     <string name="flex_player_play_error_retry">点击重试</string>
     <string name="wifi_not_connect_notify">您正在使用非wifi网络，继续播放将产生流量费用</string>
+
+    <string name="player_speed">倍速</string>
+    <string name="player_list">选集</string>
+
 </resources>
