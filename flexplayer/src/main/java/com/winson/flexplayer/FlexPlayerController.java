@@ -27,6 +27,10 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -82,15 +86,26 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private boolean onCenter;
     private boolean onLeft;
     private boolean onRight;
+    private boolean onUpdateTime;
     private float touchSlop;
     private int startPosition;
     private int seekToProgress;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
     private AudioManager audioManager;
     private Handler handler = new Handler();
     private Runnable hiddenTopAndBottomRunnable = new Runnable() {
         @Override
         public void run() {
             hiddenAnimator.start();
+        }
+    };
+    private Runnable updateTimeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (timeTV != null) {
+                timeTV.setText(simpleDateFormat.format(new Date()));
+            }
+            handler.postDelayed(this, 400);
         }
     };
 
@@ -285,6 +300,21 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         restartOrPause.setOnClickListener(this);
 
         hiddenTopAndBottom();
+    }
+
+    private void startUpdateTime(FlexPlayer.Mode mode) {
+        if (mode == FlexPlayer.Mode.FULL_SCREEN) {
+            if (!onUpdateTime) {
+                handler.removeCallbacks(updateTimeRunnable);
+                updateTimeRunnable.run();
+                onUpdateTime = true;
+            }
+        }
+    }
+
+    private void stopUpdateTime() {
+        handler.removeCallbacks(updateTimeRunnable);
+        onUpdateTime = false;
     }
 
     private void hiddenBar() {
@@ -546,6 +576,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                         new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 hasRegisterBatteryReceiver = true;
             }
+            startUpdateTime(mode);
         } else {
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_enlarge);
             batteryTimeLayout.setVisibility(View.GONE);
@@ -553,6 +584,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 getContext().unregisterReceiver(batterReceiver);
                 hasRegisterBatteryReceiver = false;
             }
+            stopUpdateTime();
         }
         currentMode = mode;
     }
@@ -573,11 +605,18 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         titleTextView.setText(titleRes);
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        stopUpdateTime();
+    }
+
     public void updateProgress() {
         long position = flexPlayer.getPosition();
         long duration = flexPlayer.getDuration();
         positionTextView.setText(FlexPlayerUtils.formatTime(position));
         durationTextView.setText(FlexPlayerUtils.formatTime(duration));
+        startUpdateTime(currentMode);
         if (!seekBarOnTouch) {
             int bufferPercentage = flexPlayer.getBufferPercentage();
             seekBar.setSecondaryProgress(bufferPercentage);
