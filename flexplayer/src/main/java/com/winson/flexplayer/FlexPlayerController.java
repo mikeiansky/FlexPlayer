@@ -316,8 +316,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 onHidden = false;
                 if (currentState == FlexPlayer.State.PLAY) {
                     hiddenTopAndBottomDelay();
-                } else {
-                    clearHiddenRunnable();
                 }
             }
 
@@ -359,7 +357,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
                 onHidden = true;
-                clearHiddenRunnable();
             }
 
             @Override
@@ -652,28 +649,26 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     private void hiddenSpeedContent() {
+        handler.removeCallbacks(hiddenSpeedContentRunnable);
         speedGroup.setTranslationX(speedContentWidth);
     }
 
     private void hiddenResolutionContent() {
+        handler.removeCallbacks(hiddenResolutionContentRunnable);
         resolutionContent.setTranslationX(speedContentWidth);
     }
 
     private void hiddenSelectionContent() {
+        handler.removeCallbacks(hiddenSelectionContentRunnable);
         selectionContent.setTranslationX(selectionContentWidth);
     }
 
     private void hiddenBar() {
+        handler.removeCallbacks(hiddenTopAndBottomRunnable);
         onAnimator = false;
         onHidden = true;
         top.setTranslationY(-barHeight);
         bottom.setTranslationY(barHeight);
-
-        clearHiddenRunnable();
-    }
-
-    private void clearHiddenRunnable() {
-        handler.removeCallbacks(hiddenTopAndBottomRunnable);
     }
 
     private void hiddenTopAndBottomDelay() {
@@ -776,7 +771,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                clearHiddenRunnable();
                 downX = event.getX();
                 downY = event.getY();
                 // is left or right
