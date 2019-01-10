@@ -153,6 +153,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             hiddenResolutionAnimator.start();
         }
     };
+    private Runnable hiddenSelectionContentRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (onShowSelectionContent) {
+                hiddenSelectionAnimator.start();
+            }
+        }
+    };
     private Runnable updateTimeRunnable = new Runnable() {
         @Override
         public void run() {
@@ -162,6 +170,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             handler.postDelayed(this, 400);
         }
     };
+
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -227,6 +236,57 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         selections.add(selection6);
         selections.add(selection7);
         flexPlayerSelectionAdapter.updateSelections(selections);
+        showSelectionAnimator = ObjectAnimator.ofFloat(selectionContent,
+                "translationX", selectionContentWidth, 0f);
+        showSelectionAnimator.setDuration(duration);
+        showSelectionAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowSelectionContent = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+                hiddenSelectionContentDelay(true);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        hiddenSelectionAnimator = ObjectAnimator.ofFloat(selectionContent,
+                "translationX", 0f, selectionContentWidth);
+        hiddenSelectionAnimator.setDuration(duration);
+        hiddenSelectionAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onShowSelectionContent = false;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
 
         resolutionContent = content.findViewById(R.id.resolution_content);
         resolutionRecyclerView = content.findViewById(R.id.resolution_recycler_view);
@@ -544,6 +604,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         hiddenSpeedContent();
         hiddenBar();
         hiddenResolutionContent();
+        hiddenSelectionContent();
     }
 
     private void showToolBar(boolean show) {
@@ -579,6 +640,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         resolutionContent.setTranslationX(speedContentWidth);
     }
 
+    private void hiddenSelectionContent() {
+        selectionContent.setTranslationX(selectionContentWidth);
+    }
+
     private void hiddenBar() {
         onAnimator = false;
         onHidden = true;
@@ -603,6 +668,21 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             handler.postDelayed(hiddenSpeedContentRunnable, 5000);
         } else {
             hiddenSpeedContentRunnable.run();
+        }
+    }
+
+    private void showSelectionContent() {
+        if (!onShowSelectionContent) {
+            showSelectionAnimator.start();
+        }
+    }
+
+    private void hiddenSelectionContentDelay(boolean delay) {
+        handler.removeCallbacks(hiddenSelectionContentRunnable);
+        if (delay) {
+            handler.postDelayed(hiddenSelectionContentRunnable, 5000);
+        } else {
+            hiddenSelectionContentRunnable.run();
         }
     }
 
@@ -772,6 +852,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                         hiddenSpeedContentDelay(false);
                     } else if (onShowResolutionContent) {
                         hiddenResolutionContentDelay(false);
+                    } else if (onShowSelectionContent) {
+                        hiddenSelectionContentDelay(false);
                     } else {
                         showToolBar(onHidden);
                     }
@@ -854,7 +936,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         } else if (id == R.id.resolution_flag) {
             showToolBar(false);
             showResolutionAnimator.start();
+        } else if (id == R.id.selection_flag) {
+            showToolBar(false);
+            showSelectionContent();
         }
+
     }
 
     public void setCurrentMode(FlexPlayer.Mode mode) {
