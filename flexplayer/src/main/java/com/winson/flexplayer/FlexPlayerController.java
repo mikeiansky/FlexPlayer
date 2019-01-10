@@ -91,7 +91,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private View playerSpeed;
     private View speedGroup;
     private RecyclerView speedRecyclerView;
-    private RecyclerView.Adapter flexPlayerSpeedAdapter;
+    private FlexPlayerSpeedAdapter flexPlayerSpeedAdapter;
     private ObjectAnimator showSpeedContentAnimator;
     private ObjectAnimator hiddenSpeedContentAnimator;
     private boolean onShowSpeedContent;
@@ -608,6 +608,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         speedRecyclerView = findViewById(R.id.speed_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         flexPlayerSpeedAdapter = new FlexPlayerSpeedAdapter();
+        flexPlayerSpeedAdapter.setOnItemClickListener(new FlexPlayerSpeedAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View child, int position, FlexPlayerSpeed speed) {
+                if (flexPlayer != null) {
+                    flexPlayer.setSpeed(speed.getSpeed());
+                }
+            }
+        });
         speedRecyclerView.setLayoutManager(layoutManager);
         speedRecyclerView.setAdapter(flexPlayerSpeedAdapter);
 
@@ -1108,7 +1116,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     private void updateSpeed(float speed) {
-        // TODO
+        if (flexPlayerSpeedAdapter != null) {
+            flexPlayerSpeedAdapter.updateSpeed(speed);
+        }
     }
 
     public void updateProgress() {

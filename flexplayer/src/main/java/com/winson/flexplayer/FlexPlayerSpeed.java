@@ -9,8 +9,8 @@ public enum FlexPlayerSpeed {
 
     DOT_EIGHT(0.8f, "0.8X"),
     ONE(1f, "1X"),
-    ONE_DOT_TWO_FIVE(1.5f, "1.25X"),
-    ONE_DOT_FIVE(1f, "1.5X"),
+    ONE_DOT_TWO_FIVE(1.25f, "1.25X"),
+    ONE_DOT_FIVE(1.5f, "1.5X"),
     TWO(2f, "2X");
 
     private float speed;

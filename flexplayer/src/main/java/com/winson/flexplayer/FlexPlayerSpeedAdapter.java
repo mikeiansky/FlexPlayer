@@ -14,11 +14,27 @@ import androidx.recyclerview.widget.RecyclerView;
  */
 class FlexPlayerSpeedAdapter extends RecyclerView.Adapter {
 
+    interface OnItemClickListener {
+        void onItemClick(View child, int position, FlexPlayerSpeed speed);
+    }
+
     private static class FlexPlayerSpeedViewHolder extends RecyclerView.ViewHolder {
 
         public FlexPlayerSpeedViewHolder(@NonNull View itemView) {
             super(itemView);
         }
+    }
+
+    private float speed = 1.0f;
+    private OnItemClickListener onItemClickListener;
+
+    public void updateSpeed(float speed) {
+        this.speed = speed;
+        notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -30,10 +46,26 @@ class FlexPlayerSpeedAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        FlexPlayerSpeed speed = FlexPlayerSpeed.values()[position];
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+        final FlexPlayerSpeed speedItem = FlexPlayerSpeed.values()[position];
         TextView titleTV = holder.itemView.findViewById(R.id.title);
-        titleTV.setText(speed.getName());
+        titleTV.setText(speedItem.getName());
+        if (speed == speedItem.getSpeed()) {
+            holder.itemView.setSelected(true);
+        } else {
+            holder.itemView.setSelected(false);
+        }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (speed != speedItem.getSpeed()) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemClick(v, position, speedItem);
+                    }
+                    updateSpeed(speedItem.getSpeed());
+                }
+            }
+        });
     }
 
     @Override
