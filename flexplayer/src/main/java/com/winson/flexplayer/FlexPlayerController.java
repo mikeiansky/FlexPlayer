@@ -12,9 +12,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -65,8 +62,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private boolean seekBarOnTouch;
     private View top, bottom;
 
-    private ValueAnimator showAnimator;
-    private ValueAnimator hiddenAnimator;
+    private ValueAnimator showToolContentAnimator;
+    private ValueAnimator hiddenToolContentAnimator;
     private ObjectAnimator showSpeedContentAnimator;
     private ObjectAnimator hiddenSpeedContentAnimator;
     private boolean onShowSpeedContent;
@@ -138,7 +135,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private Runnable hiddenTopAndBottomRunnable = new Runnable() {
         @Override
         public void run() {
-            hiddenAnimator.start();
+            hiddenToolContentAnimator.start();
         }
     };
     private Runnable hiddenSpeedContentRunnable = new Runnable() {
@@ -211,11 +208,186 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         content.setLayoutParams(lp);
         addView(content);
 
-        // 剧集组件
-        selectionFlag = content.findViewById(R.id.selection_flag);
+        initSelectionContent();
+        initResolutionContent();
+        initSpeedContent();
+        initToolContent();
+
+        changeContent = content.findViewById(R.id.change_content);
+        playerSpeed = content.findViewById(R.id.player_speed);
+        playerSpeed.setOnClickListener(this);
+
+        resolutionFlag = content.findViewById(R.id.resolution_flag);
+        resolutionFlag.setOnClickListener(this);
+
+        batteryTimeLayout = content.findViewById(R.id.battery_time);
+        batteryIV = content.findViewById(R.id.battery);
+        timeTV = content.findViewById(R.id.time);
+
+        changeBrightness = content.findViewById(R.id.change_brightness);
+        changeBrightnessProgress = content.findViewById(R.id.change_brightness_progress);
+
+        changeVolume = content.findViewById(R.id.change_volume);
+        changeVolumeProgress = content.findViewById(R.id.change_volume_progress);
+
+        noWifiNotifyTextView = content.findViewById(R.id.no_wifi_notify_tv);
+        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        changeContainer = content.findViewById(R.id.change_position);
+        changePositionCurrent = content.findViewById(R.id.change_position_current);
+        changePositionProgress = content.findViewById(R.id.change_position_progress);
+
+        backImage = content.findViewById(R.id.back);
+        backImage.setOnClickListener(this);
+        backImage.setVisibility(View.INVISIBLE);
+
+        titleTextView = findViewById(R.id.title);
+
+        coverImage = content.findViewById(R.id.cover_image);
+        loadingView = content.findViewById(R.id.loading);
+
+        enterFullScreen = content.findViewById(R.id.full_screen);
+        enterFullScreen.setOnClickListener(this);
+
+        centerStart = content.findViewById(R.id.center_start);
+        centerStart.setOnClickListener(this);
+
+        seekBar = content.findViewById(R.id.seek);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seekBarOnTouch = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekBarOnTouch = false;
+                int position = (int) (flexPlayer.getDuration() * seekBar.getProgress() / 100f);
+                flexPlayer.seekTo(position);
+                if (flexPlayer.haveDataSource()) {
+                    if (!flexPlayer.isPlaying()) {
+                        flexPlayer.play();
+                    }
+                }
+            }
+        });
+
+        positionTextView = content.findViewById(R.id.position);
+        durationTextView = content.findViewById(R.id.duration);
+        restartOrPause = content.findViewById(R.id.restart_or_pause);
+        restartOrPause.setOnClickListener(this);
+
+        hiddenSpeedContent();
+        hiddenBar();
+        hiddenResolutionContent();
+        hiddenSelectionContent();
+    }
+
+    /**
+     * 初始化工具栏模块
+     */
+    private void initToolContent() {
+        top = findViewById(R.id.top);
+        bottom = findViewById(R.id.bottom);
+        showToolContentAnimator = ValueAnimator.ofFloat(0f, 1f);
+        showToolContentAnimator.setDuration(duration);
+        showToolContentAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float alpha = (float) animation.getAnimatedValue();
+
+                float ra = 1 - alpha;
+                top.setTranslationY(-ra * barHeight);
+                bottom.setTranslationY(ra * barHeight);
+
+                if (currentState == FlexPlayer.State.PAUSE) {
+                    centerStart.setAlpha(alpha);
+                }
+            }
+        });
+        showToolContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onHidden = false;
+                if (currentState == FlexPlayer.State.PLAY) {
+                    hiddenTopAndBottomDelay();
+                } else {
+                    clearHiddenRunnable();
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                onAnimator = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        hiddenToolContentAnimator = ValueAnimator.ofFloat(1f, 0f);
+        hiddenToolContentAnimator.setDuration(duration);
+        hiddenToolContentAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float alpha = (float) animation.getAnimatedValue();
+
+                float ra = 1 - alpha;
+                top.setTranslationY(-ra * barHeight);
+                bottom.setTranslationY(ra * barHeight);
+
+                if (currentState == FlexPlayer.State.PAUSE) {
+                    centerStart.setAlpha(alpha);
+                }
+            }
+        });
+        hiddenToolContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                onAnimator = true;
+                onHidden = true;
+                clearHiddenRunnable();
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                hiddenBar();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                onAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+    }
+
+    /**
+     * 初始化剧集模块
+     */
+    private void initSelectionContent() {
+        selectionFlag = findViewById(R.id.selection_flag);
         selectionFlag.setOnClickListener(this);
-        selectionContent = content.findViewById(R.id.selection_content);
-        selectionRecyclerView = content.findViewById(R.id.selection_recycler_view);
+        selectionContent = findViewById(R.id.selection_content);
+        selectionRecyclerView = findViewById(R.id.selection_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         flexPlayerSelectionAdapter = new FlexPlayerSelectionAdapter();
         selectionRecyclerView.setLayoutManager(layoutManager);
@@ -287,9 +459,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             }
         });
+    }
 
-        resolutionContent = content.findViewById(R.id.resolution_content);
-        resolutionRecyclerView = content.findViewById(R.id.resolution_recycler_view);
+    /**
+     * 初始化分辨率模块
+     */
+    private void initResolutionContent() {
+        resolutionContent = findViewById(R.id.resolution_content);
+        resolutionRecyclerView = findViewById(R.id.resolution_recycler_view);
         flexPlayerResolutionAdapter = new FlexPlayerResolutionAdapter();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         resolutionRecyclerView.setLayoutManager(linearLayoutManager);
@@ -315,56 +492,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         resolutions.add(resolution3);
         resolutions.add(resolution4);
         flexPlayerResolutionAdapter.updateData(resolutions);
-
-        speedDotEight = content.findViewById(R.id.dot_eight);
-        speedOne = content.findViewById(R.id.one);
-        speedOneDotTwoFive = content.findViewById(R.id.one_dot_two_five);
-        speedOneDotFive = content.findViewById(R.id.one_dot_five);
-        speedTwo = content.findViewById(R.id.two);
-
-        speedGroup = content.findViewById(R.id.speed_content);
-        speedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.dot_eight) {
-                    flexPlayer.setSpeed(0.8f);
-                } else if (checkedId == R.id.one) {
-                    flexPlayer.setSpeed(1f);
-                } else if (checkedId == R.id.one_dot_two_five) {
-                    flexPlayer.setSpeed(1.25f);
-                } else if (checkedId == R.id.one_dot_five) {
-                    flexPlayer.setSpeed(1.5f);
-                } else if (checkedId == R.id.two) {
-                    flexPlayer.setSpeed(2f);
-                }
-            }
-        });
-
-        changeContent = content.findViewById(R.id.change_content);
-        playerSpeed = content.findViewById(R.id.player_speed);
-        playerSpeed.setOnClickListener(this);
-
-        resolutionFlag = content.findViewById(R.id.resolution_flag);
-        resolutionFlag.setOnClickListener(this);
-
-        batteryTimeLayout = content.findViewById(R.id.battery_time);
-        batteryIV = content.findViewById(R.id.battery);
-        timeTV = content.findViewById(R.id.time);
-
-        changeBrightness = content.findViewById(R.id.change_brightness);
-        changeBrightnessProgress = content.findViewById(R.id.change_brightness_progress);
-
-        changeVolume = content.findViewById(R.id.change_volume);
-        changeVolumeProgress = content.findViewById(R.id.change_volume_progress);
-
-        noWifiNotifyTextView = content.findViewById(R.id.no_wifi_notify_tv);
-        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        changeContainer = content.findViewById(R.id.change_position);
-        changePositionCurrent = content.findViewById(R.id.change_position_current);
-        changePositionProgress = content.findViewById(R.id.change_position_progress);
-
-        top = content.findViewById(R.id.top);
-        bottom = content.findViewById(R.id.bottom);
 
         showResolutionAnimator = ObjectAnimator.ofFloat(resolutionContent, "translationX", speedContentWidth, 0f);
         showResolutionAnimator.setDuration(duration);
@@ -414,6 +541,34 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationRepeat(Animator animation) {
 
+            }
+        });
+    }
+
+    /**
+     * 初始化倍速模块
+     */
+    private void initSpeedContent() {
+        speedDotEight = findViewById(R.id.dot_eight);
+        speedOne = findViewById(R.id.one);
+        speedOneDotTwoFive = findViewById(R.id.one_dot_two_five);
+        speedOneDotFive = findViewById(R.id.one_dot_five);
+        speedTwo = findViewById(R.id.two);
+        speedGroup = findViewById(R.id.speed_content);
+        speedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.dot_eight) {
+                    flexPlayer.setSpeed(0.8f);
+                } else if (checkedId == R.id.one) {
+                    flexPlayer.setSpeed(1f);
+                } else if (checkedId == R.id.one_dot_two_five) {
+                    flexPlayer.setSpeed(1.25f);
+                } else if (checkedId == R.id.one_dot_five) {
+                    flexPlayer.setSpeed(1.5f);
+                } else if (checkedId == R.id.two) {
+                    flexPlayer.setSpeed(2f);
+                }
             }
         });
 
@@ -469,150 +624,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             }
         });
-
-        showAnimator = ValueAnimator.ofFloat(0f, 1f);
-        showAnimator.setDuration(duration);
-        showAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float alpha = (float) animation.getAnimatedValue();
-
-                float ra = 1 - alpha;
-                top.setTranslationY(-ra * barHeight);
-                bottom.setTranslationY(ra * barHeight);
-
-                if (currentState == FlexPlayer.State.PAUSE) {
-                    centerStart.setAlpha(alpha);
-                }
-            }
-        });
-        showAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                onAnimator = true;
-                onHidden = false;
-                if (currentState == FlexPlayer.State.PLAY) {
-                    hiddenTopAndBottomDelay();
-                } else {
-                    clearHiddenRunnable();
-                }
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                onAnimator = false;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                onAnimator = false;
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        hiddenAnimator = ValueAnimator.ofFloat(1f, 0f);
-        hiddenAnimator.setDuration(duration);
-        hiddenAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float alpha = (float) animation.getAnimatedValue();
-
-                float ra = 1 - alpha;
-                top.setTranslationY(-ra * barHeight);
-                bottom.setTranslationY(ra * barHeight);
-
-                if (currentState == FlexPlayer.State.PAUSE) {
-                    centerStart.setAlpha(alpha);
-                }
-            }
-        });
-        hiddenAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                onAnimator = true;
-                onHidden = true;
-                clearHiddenRunnable();
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                hiddenBar();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                onAnimator = false;
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        backImage = content.findViewById(R.id.back);
-        backImage.setOnClickListener(this);
-        backImage.setVisibility(View.INVISIBLE);
-
-        titleTextView = findViewById(R.id.title);
-
-        coverImage = content.findViewById(R.id.cover_image);
-        loadingView = content.findViewById(R.id.loading);
-
-        enterFullScreen = content.findViewById(R.id.full_screen);
-        enterFullScreen.setOnClickListener(this);
-
-        centerStart = content.findViewById(R.id.center_start);
-        centerStart.setOnClickListener(this);
-
-        seekBar = content.findViewById(R.id.seek);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                seekBarOnTouch = true;
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarOnTouch = false;
-                int position = (int) (flexPlayer.getDuration() * seekBar.getProgress() / 100f);
-                flexPlayer.seekTo(position);
-                if (flexPlayer.haveDataSource()) {
-                    if (!flexPlayer.isPlaying()) {
-                        flexPlayer.play();
-                    }
-                }
-            }
-        });
-
-        positionTextView = content.findViewById(R.id.position);
-        durationTextView = content.findViewById(R.id.duration);
-        restartOrPause = content.findViewById(R.id.restart_or_pause);
-        restartOrPause.setOnClickListener(this);
-
-        hiddenSpeedContent();
-        hiddenBar();
-        hiddenResolutionContent();
-        hiddenSelectionContent();
     }
 
     private void showToolBar(boolean show) {
         if (!onAnimator) {
             if (show && onHidden) {
-                showAnimator.start();
+                showToolContentAnimator.start();
             } else if (!show && !onHidden) {
-                hiddenAnimator.start();
+                hiddenToolContentAnimator.start();
             }
         }
     }
@@ -886,6 +905,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     public boolean exitFullScreen() {
         if (onShowSpeedContent) {
             hiddenSpeedContentDelay(false);
+            return true;
+        } else if (onShowResolutionContent) {
+            hiddenResolutionContentDelay(false);
+            return true;
+        } else if (onShowSelectionContent) {
+            hiddenSelectionContentDelay(false);
             return true;
         }
         return false;
