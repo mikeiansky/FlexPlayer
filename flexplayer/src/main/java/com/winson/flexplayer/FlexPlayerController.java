@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -79,6 +80,17 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ImageView batteryIV;
     private TextView timeTV;
     private LinearLayout changeContent;
+
+    // 锁屏模块
+    private View lockContent;
+    private View lockFlag;
+    private boolean isLock;
+    private float lockMarginLeft;
+    private ValueAnimator showLockContentAnimator;
+    private ValueAnimator hiddenLockContentAnimator;
+    private boolean lockOnAnimator;
+    private boolean onShowLockContent;
+    // --------
 
     // 工具栏组件
     private View top, bottom;
@@ -167,6 +179,14 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+    private Runnable hiddenLockContentRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!lockOnAnimator && onShowLockContent) {
+                hiddenLockContentAnimator.start();
+            }
+        }
+    };
     private Runnable updateTimeRunnable = new Runnable() {
         @Override
         public void run() {
@@ -176,7 +196,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             handler.postDelayed(this, 400);
         }
     };
-
 
     public FlexPlayerController(@NonNull Context context) {
         super(context);
@@ -228,6 +247,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         initResolutionContent();
         initSpeedContent();
         initToolContent();
+        initLockContent();
 
         changeContent = content.findViewById(R.id.change_content);
         playerSpeed = content.findViewById(R.id.player_speed);
@@ -301,6 +321,71 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         hiddenBar();
         hiddenResolutionContent();
         hiddenSelectionContent();
+        hiddenLockContent();
+    }
+
+    /**
+     * 初始化锁屏模块
+     */
+    private void initLockContent() {
+        lockMarginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100f,
+                getResources().getDisplayMetrics());
+        lockContent = findViewById(R.id.lock_content);
+        lockFlag = findViewById(R.id.lock_flag);
+
+        showLockContentAnimator = ObjectAnimator.ofFloat(lockContent, "translationX",
+                -lockMarginLeft, 0);
+        showLockContentAnimator.setDuration(duration);
+        showLockContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                lockOnAnimator = true;
+                onShowLockContent = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                lockOnAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                lockOnAnimator = false;
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        hiddenLockContentAnimator = ObjectAnimator.ofFloat(lockContent, "translationX",
+                0, -lockMarginLeft);
+        hiddenLockContentAnimator.setDuration(duration);
+        hiddenLockContentAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                lockOnAnimator = true;
+                onShowLockContent = false;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                lockOnAnimator = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                lockOnAnimator = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
     }
 
     /**
@@ -703,6 +788,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 hiddenToolContentAnimator.start();
             }
         }
+        if (show) {
+            showLockContent();
+        } else {
+            hiddenLockContentRunnableDelay(false);
+        }
     }
 
     private void startUpdateTime(FlexPlayer.Mode mode) {
@@ -718,6 +808,27 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void stopUpdateTime() {
         handler.removeCallbacks(updateTimeRunnable);
         onUpdateTime = false;
+    }
+
+    private void hiddenLockContent() {
+        handler.removeCallbacks(hiddenLockContentRunnable);
+        lockContent.setTranslationX(-lockMarginLeft);
+    }
+
+    private void hiddenLockContentRunnableDelay(boolean delay) {
+        handler.removeCallbacks(hiddenLockContentRunnable);
+        if (delay) {
+            handler.postDelayed(hiddenSelectionContentRunnable, 5000);
+        } else {
+            hiddenLockContentRunnable.run();
+        }
+    }
+
+    private void showLockContent() {
+        handler.removeCallbacks(hiddenLockContentRunnable);
+        if (!lockOnAnimator && !onShowLockContent) {
+            showLockContentAnimator.start();
+        }
     }
 
     private void hiddenSpeedContent() {
