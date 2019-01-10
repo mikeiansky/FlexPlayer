@@ -12,6 +12,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -788,12 +789,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     };
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
             clearAllHiddenRunnable();
         }
-        return super.onInterceptTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
@@ -813,6 +814,8 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         int action = event.getAction();
         switch (action) {
+            case MotionEvent.ACTION_CANCEL:
+                break;
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
                 downY = event.getY();
