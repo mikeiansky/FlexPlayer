@@ -60,17 +60,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private SeekBar seekBar;
     private ImageView restartOrPause;
     private boolean seekBarOnTouch;
-    private View top, bottom;
 
-    private ValueAnimator showToolContentAnimator;
-    private ValueAnimator hiddenToolContentAnimator;
-    private ObjectAnimator showSpeedContentAnimator;
-    private ObjectAnimator hiddenSpeedContentAnimator;
-    private boolean onShowSpeedContent;
     private int duration = 250;
-
     private boolean onAnimator;
-    private boolean onHidden;
     private float barHeight;
     private float speedContentWidth;
     private float selectionContentWidth;
@@ -92,10 +84,21 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     private LinearLayout changeContent;
 
+    // 工具栏组件
+    private View top, bottom;
+    private ValueAnimator showToolContentAnimator;
+    private ValueAnimator hiddenToolContentAnimator;
+    private boolean onToolContentHidden;
+    // --------
+
     // 倍速控制组件
     private View playerSpeed;
     private RadioGroup speedGroup;
     private RadioButton speedDotEight, speedOne, speedOneDotTwoFive, speedOneDotFive, speedTwo;
+    private ObjectAnimator showSpeedContentAnimator;
+    private ObjectAnimator hiddenSpeedContentAnimator;
+    private boolean onShowSpeedContent;
+    // --------
 
     // 分辨率控制组件
     private View resolutionFlag;
@@ -105,6 +108,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ObjectAnimator showResolutionAnimator;
     private ObjectAnimator hiddenResolutionAnimator;
     private boolean onShowResolutionContent;
+    // --------
 
     // 剧集控制组件
     private View selectionFlag;
@@ -114,6 +118,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ObjectAnimator showSelectionAnimator;
     private ObjectAnimator hiddenSelectionAnimator;
     private boolean onShowSelectionContent;
+    // --------
 
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
@@ -128,32 +133,39 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private float touchSlop;
     private int startPosition;
     private int seekToProgress;
+
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
     private AudioManager audioManager;
     private Handler handler = new Handler();
 
-    private Runnable hiddenTopAndBottomRunnable = new Runnable() {
+    private Runnable hiddenToolContentRunnable = new Runnable() {
         @Override
         public void run() {
-            hiddenToolContentAnimator.start();
+            if (!onAnimator && !onToolContentHidden) {
+                hiddenToolContentAnimator.start();
+            }
         }
     };
     private Runnable hiddenSpeedContentRunnable = new Runnable() {
         @Override
         public void run() {
-            hiddenSpeedContentAnimator.start();
+            if (!onAnimator && onShowSpeedContent) {
+                hiddenSpeedContentAnimator.start();
+            }
         }
     };
     private Runnable hiddenResolutionContentRunnable = new Runnable() {
         @Override
         public void run() {
-            hiddenResolutionAnimator.start();
+            if (!onAnimator && onShowResolutionContent) {
+                hiddenResolutionAnimator.start();
+            }
         }
     };
     private Runnable hiddenSelectionContentRunnable = new Runnable() {
         @Override
         public void run() {
-            if (onShowSelectionContent) {
+            if (!onAnimator && onShowSelectionContent) {
                 hiddenSelectionAnimator.start();
             }
         }
@@ -195,7 +207,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showToolBar(onHidden);
+                showToolBar(onToolContentHidden);
             }
         });
 
@@ -313,7 +325,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
-                onHidden = false;
+                onToolContentHidden = false;
                 if (currentState == FlexPlayer.State.PLAY) {
                     hiddenTopAndBottomDelay();
                 }
@@ -356,7 +368,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             @Override
             public void onAnimationStart(Animator animation) {
                 onAnimator = true;
-                onHidden = true;
+                onToolContentHidden = true;
             }
 
             @Override
@@ -625,9 +637,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     private void showToolBar(boolean show) {
         if (!onAnimator) {
-            if (show && onHidden) {
+            if (show && onToolContentHidden) {
                 showToolContentAnimator.start();
-            } else if (!show && !onHidden) {
+            } else if (!show && !onToolContentHidden) {
                 hiddenToolContentAnimator.start();
             }
         }
@@ -664,16 +676,23 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     private void hiddenBar() {
-        handler.removeCallbacks(hiddenTopAndBottomRunnable);
+        handler.removeCallbacks(hiddenToolContentRunnable);
         onAnimator = false;
-        onHidden = true;
+        onToolContentHidden = true;
         top.setTranslationY(-barHeight);
         bottom.setTranslationY(barHeight);
     }
 
     private void hiddenTopAndBottomDelay() {
-        handler.removeCallbacks(hiddenTopAndBottomRunnable);
-        handler.postDelayed(hiddenTopAndBottomRunnable, 5000);
+        handler.removeCallbacks(hiddenToolContentRunnable);
+        handler.postDelayed(hiddenToolContentRunnable, 5000);
+    }
+
+    private void showSpeedContent() {
+        handler.removeCallbacks(hiddenSpeedContentRunnable);
+        if (!onShowSpeedContent) {
+            showSpeedContentAnimator.start();
+        }
     }
 
     private void hiddenSpeedContentDelay(boolean delay) {
@@ -686,6 +705,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     private void showSelectionContent() {
+        handler.removeCallbacks(hiddenSelectionContentRunnable);
         if (!onShowSelectionContent) {
             showSelectionAnimator.start();
         }
@@ -700,6 +720,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    private void showResolutionContent() {
+        handler.removeCallbacks(hiddenResolutionContentRunnable);
+        if (!onShowResolutionContent) {
+            showResolutionAnimator.start();
+        }
+    }
+
     private void hiddenResolutionContentDelay(boolean delay) {
         handler.removeCallbacks(hiddenResolutionContentRunnable);
         if (delay) {
@@ -707,6 +734,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         } else {
             hiddenResolutionContentRunnable.run();
         }
+    }
+
+    private void clearAllHiddenRunnable() {
+        handler.removeCallbacks(hiddenSelectionContentRunnable);
+        handler.removeCallbacks(hiddenResolutionContentRunnable);
+        handler.removeCallbacks(hiddenSpeedContentRunnable);
+        handler.removeCallbacks(hiddenToolContentRunnable);
     }
 
     public void showBackImage(boolean show) {
@@ -752,6 +786,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        if (action == MotionEvent.ACTION_DOWN) {
+            clearAllHiddenRunnable();
+        }
+        return super.onInterceptTouchEvent(ev);
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -868,7 +911,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                     } else if (onShowSelectionContent) {
                         hiddenSelectionContentDelay(false);
                     } else {
-                        showToolBar(onHidden);
+                        showToolBar(onToolContentHidden);
                     }
                 } else {
                     hiddenTopAndBottomDelay();
@@ -951,10 +994,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         } else if (id == R.id.player_speed) {
             showToolBar(false);
-            showSpeedContentAnimator.start();
+            showSpeedContent();
         } else if (id == R.id.resolution_flag) {
             showToolBar(false);
-            showResolutionAnimator.start();
+            showResolutionContent();
         } else if (id == R.id.selection_flag) {
             showToolBar(false);
             showSelectionContent();
