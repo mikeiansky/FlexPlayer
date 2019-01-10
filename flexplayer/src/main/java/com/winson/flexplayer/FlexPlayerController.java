@@ -48,6 +48,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     private static final String TAG = FlexPlayerController.class.getSimpleName();
 
+    private boolean seekBarOnTouch;
+    private int duration = 250;
+    private boolean onAnimator;
+    private float barHeight;
+    private float speedContentWidth;
+    private float selectionContentWidth;
+
     private FlexPlayer flexPlayer;
     private FlexPlayer.State currentState;
     private FlexPlayer.Mode currentMode;
@@ -60,29 +67,17 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private TextView noWifiNotifyTextView;
     private SeekBar seekBar;
     private ImageView restartOrPause;
-    private boolean seekBarOnTouch;
-
-    private int duration = 250;
-    private boolean onAnimator;
-    private float barHeight;
-    private float speedContentWidth;
-    private float selectionContentWidth;
-
     private TextView changePositionCurrent;
     private View changeContainer;
     private ProgressBar changePositionProgress;
     private ImageView backImage;
-
     private LinearLayout changeBrightness;
     private ProgressBar changeBrightnessProgress;
-
     private LinearLayout changeVolume;
     private ProgressBar changeVolumeProgress;
-
     private LinearLayout batteryTimeLayout;
     private ImageView batteryIV;
     private TextView timeTV;
-
     private LinearLayout changeContent;
 
     // 工具栏组件
@@ -475,6 +470,26 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             }
         });
+        selectionRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                if (e.getAction() == MotionEvent.ACTION_UP) {
+                    if (onShowSelectionContent) {
+                        hiddenSelectionContentDelay(true);
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
     }
 
     /**
@@ -559,6 +574,28 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             }
         });
+
+        resolutionRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                if (e.getAction() == MotionEvent.ACTION_UP) {
+                    if (onShowResolutionContent) {
+                        hiddenResolutionContentDelay(true);
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
     }
 
     /**
@@ -640,6 +677,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             }
         });
+
     }
 
     private void showToolBar(boolean show) {
