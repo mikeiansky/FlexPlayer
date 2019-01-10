@@ -89,8 +89,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     // 倍速控制组件
     private View playerSpeed;
-    private RadioGroup speedGroup;
-    private RadioButton speedDotEight, speedOne, speedOneDotTwoFive, speedOneDotFive, speedTwo;
+    private View speedGroup;
+    private RecyclerView speedRecyclerView;
+    private RecyclerView.Adapter flexPlayerSpeedAdapter;
     private ObjectAnimator showSpeedContentAnimator;
     private ObjectAnimator hiddenSpeedContentAnimator;
     private boolean onShowSpeedContent;
@@ -199,6 +200,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        FlexPlayerSpeed.values();
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setOnClickListener(new OnClickListener() {
             @Override
@@ -602,28 +604,12 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
      * 初始化倍速模块
      */
     private void initSpeedContent() {
-        speedDotEight = findViewById(R.id.dot_eight);
-        speedOne = findViewById(R.id.one);
-        speedOneDotTwoFive = findViewById(R.id.one_dot_two_five);
-        speedOneDotFive = findViewById(R.id.one_dot_five);
-        speedTwo = findViewById(R.id.two);
         speedGroup = findViewById(R.id.speed_content);
-        speedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.dot_eight) {
-                    flexPlayer.setSpeed(0.8f);
-                } else if (checkedId == R.id.one) {
-                    flexPlayer.setSpeed(1f);
-                } else if (checkedId == R.id.one_dot_two_five) {
-                    flexPlayer.setSpeed(1.25f);
-                } else if (checkedId == R.id.one_dot_five) {
-                    flexPlayer.setSpeed(1.5f);
-                } else if (checkedId == R.id.two) {
-                    flexPlayer.setSpeed(2f);
-                }
-            }
-        });
+        speedRecyclerView = findViewById(R.id.speed_recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        flexPlayerSpeedAdapter = new FlexPlayerSpeedAdapter();
+        speedRecyclerView.setLayoutManager(layoutManager);
+        speedRecyclerView.setAdapter(flexPlayerSpeedAdapter);
 
         showSpeedContentAnimator = ObjectAnimator.ofFloat(speedGroup, "translationX", speedContentWidth, 0f);
         showSpeedContentAnimator.setDuration(duration);
@@ -678,6 +664,27 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         });
 
+        speedRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                if (e.getAction() == MotionEvent.ACTION_UP) {
+                    if (onShowSpeedContent) {
+                        hiddenSpeedContentDelay(true);
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
     }
 
     private void showToolBar(boolean show) {
@@ -1101,17 +1108,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     private void updateSpeed(float speed) {
-        if (speed == 0.8f) {
-            speedGroup.check(R.id.dot_eight);
-        } else if (speed == 1.25f) {
-            speedGroup.check(R.id.one_dot_two_five);
-        } else if (speed == 1.5f) {
-            speedGroup.check(R.id.one_dot_five);
-        } else if (speed == 2f) {
-            speedGroup.check(R.id.two);
-        } else {
-            speedGroup.check(R.id.one);
-        }
+        // TODO
     }
 
     public void updateProgress() {

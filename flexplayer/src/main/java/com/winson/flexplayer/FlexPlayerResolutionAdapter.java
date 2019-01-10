@@ -20,7 +20,7 @@ class FlexPlayerResolutionAdapter extends RecyclerView.Adapter {
         void onItemClick(View child, int position, FlexPlayerResolution resolution);
     }
 
-    static class FlexPlayerResolutionViewHolder extends RecyclerView.ViewHolder {
+    private static class FlexPlayerResolutionViewHolder extends RecyclerView.ViewHolder {
 
         FlexPlayerResolutionViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
  * @date on 2019/1/9
  * @Author Winson
  */
-public class FlexPlayerSelectionAdapter extends RecyclerView.Adapter {
+class FlexPlayerSelectionAdapter extends RecyclerView.Adapter {
 
-    static class FlexPlayerSelectionViewHolder extends RecyclerView.ViewHolder {
+    private static class FlexPlayerSelectionViewHolder extends RecyclerView.ViewHolder {
         public FlexPlayerSelectionViewHolder(@NonNull View itemView) {
             super(itemView);
         }

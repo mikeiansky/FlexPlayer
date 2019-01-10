@@ -123,7 +123,7 @@
     </LinearLayout>
 
     <!-- 倍速控制区 -->
-    <RadioGroup
+    <LinearLayout
         android:id="@+id/speed_content"
         android:layout_width="@dimen/player_speed_content_width"
         android:layout_height="match_parent"
@@ -132,57 +132,12 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/dot_eight"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/speed_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:button="@null"
-            android:gravity="center"
-            android:text="0.8X"
-            android:textColor="@color/player_text_color"
-            android:textSize="14sp" />
+            android:layout_height="wrap_content" />
 
-        <RadioButton
-            android:id="@+id/one"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.0X"
-            android:textColor="@color/player_text_color"
-            android:textSize="14sp" />
-
-        <RadioButton
-            android:id="@+id/one_dot_two_five"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.25X"
-            android:textColor="@color/player_text_color"
-            android:textSize="14sp" />
-
-        <RadioButton
-            android:id="@+id/one_dot_five"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:button="@null"
-            android:gravity="center"
-            android:text="1.5X"
-            android:textColor="@color/player_text_color"
-            android:textSize="14sp" />
-
-        <RadioButton
-            android:id="@+id/two"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:button="@null"
-            android:gravity="center"
-            android:text="2X"
-            android:textColor="@color/player_text_color"
-            android:textSize="14sp" />
-
-    </RadioGroup>
+    </LinearLayout>
 
     <!-- 分辨率控制区-->
     <FrameLayout
