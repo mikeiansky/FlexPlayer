@@ -208,7 +208,13 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showToolBar(onToolContentHidden);
+                if (currentState == FlexPlayer.State.NONE || currentState == FlexPlayer.State.SETUP) {
+                    if (flexPlayer != null) {
+                        flexPlayer.start();
+                    }
+                } else {
+                    showToolBar(onToolContentHidden);
+                }
             }
         });
 
