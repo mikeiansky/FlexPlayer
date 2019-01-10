@@ -76,6 +76,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private boolean onHidden;
     private float barHeight;
     private float speedContentWidth;
+    private float selectionContentWidth;
 
     private TextView changePositionCurrent;
     private View changeContainer;
@@ -107,6 +108,15 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private ObjectAnimator showResolutionAnimator;
     private ObjectAnimator hiddenResolutionAnimator;
     private boolean onShowResolutionContent;
+
+    // 剧集控制组件
+    private View selectionFlag;
+    private View selectionContent;
+    private RecyclerView selectionRecyclerView;
+    private FlexPlayerSelectionAdapter flexPlayerSelectionAdapter;
+    private ObjectAnimator showSelectionAnimator;
+    private ObjectAnimator hiddenSelectionAnimator;
+    private boolean onShowSelectionContent;
 
     private boolean hasRegisterBatteryReceiver; // 是否已经注册了电池广播
     private int gestureDownVolume;
@@ -185,11 +195,38 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
         barHeight = getResources().getDimension(R.dimen.top_bottom_bar_height);
         speedContentWidth = getResources().getDimension(R.dimen.player_speed_content_width);
+        selectionContentWidth = getResources().getDimension(R.dimen.player_selection_content_width);
 
         View content = LayoutInflater.from(context).inflate(R.layout.flex_player_controller, this, false);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         content.setLayoutParams(lp);
         addView(content);
+
+        // 剧集组件
+        selectionFlag = content.findViewById(R.id.selection_flag);
+        selectionFlag.setOnClickListener(this);
+        selectionContent = content.findViewById(R.id.selection_content);
+        selectionRecyclerView = content.findViewById(R.id.selection_recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        flexPlayerSelectionAdapter = new FlexPlayerSelectionAdapter();
+        selectionRecyclerView.setLayoutManager(layoutManager);
+        selectionRecyclerView.setAdapter(flexPlayerSelectionAdapter);
+        ArrayList<FlexPlayerSelection> selections = new ArrayList<>();
+        TestSelection selection1 = new TestSelection("1", "http://play.g3proxy.lecloud.com/vod/v2/MjUxLzE2LzgvbGV0di11dHMvMTQvdmVyXzAwXzIyLTExMDc2NDEzODctYXZjLTE5OTgxOS1hYWMtNDgwMDAtNTI2MTEwLTE3MDg3NjEzLWY1OGY2YzM1NjkwZTA2ZGFmYjg2MTVlYzc5MjEyZjU4LTE0OTg1NTc2ODY4MjMubXA0?b=259&mmsid=65565355&tm=1499247143&key=f0eadb4f30c404d49ff8ebad673d3742&platid=3&splatid=345&playid=0&tss=no&vtype=21&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "one", "one", "one");
+        TestSelection selection2 = new TestSelection("2", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "two", "one", "one");
+        TestSelection selection3 = new TestSelection("3", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "three", "one", "one");
+        TestSelection selection4 = new TestSelection("4", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "four", "one", "one");
+        TestSelection selection5 = new TestSelection("5", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "four", "one", "one");
+        TestSelection selection6 = new TestSelection("6", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "four", "one", "one");
+        TestSelection selection7 = new TestSelection("7", "http://play.g3proxy.lecloud.com/vod/v2/MjQ5LzM3LzIwL2xldHYtdXRzLzE0L3Zlcl8wMF8yMi0xMTA3NjQxMzkwLWF2Yy00MTk4MTAtYWFjLTQ4MDAwLTUyNjExMC0zMTU1NTY1Mi00ZmJjYzFkNzA1NWMyNDc4MDc5OTYxODg1N2RjNzEwMi0xNDk4NTU3OTYxNzQ4Lm1wNA==?b=479&mmsid=65565355&tm=1499247143&key=98c7e781f1145aba07cb0d6ec06f6c12&platid=3&splatid=345&playid=0&tss=no&vtype=13&cvid=2026135183914&payff=0&pip=08cc52f8b09acd3eff8bf31688ddeced&format=0&sign=mb&dname=mobile&expect=1&tag=mobile&xformat=super", "four", "one", "one");
+        selections.add(selection1);
+        selections.add(selection2);
+        selections.add(selection3);
+        selections.add(selection4);
+        selections.add(selection5);
+        selections.add(selection6);
+        selections.add(selection7);
+        flexPlayerSelectionAdapter.updateSelections(selections);
 
         resolutionContent = content.findViewById(R.id.resolution_content);
         resolutionRecyclerView = content.findViewById(R.id.resolution_recycler_view);

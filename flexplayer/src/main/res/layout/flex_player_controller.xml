@@ -122,6 +122,7 @@
 
     </LinearLayout>
 
+    <!-- 倍速控制区 -->
     <RadioGroup
         android:id="@+id/speed_content"
         android:layout_width="@dimen/player_speed_content_width"
@@ -183,6 +184,7 @@
 
     </RadioGroup>
 
+    <!-- 分辨率控制区-->
     <FrameLayout
         android:id="@+id/resolution_content"
         android:layout_width="@dimen/player_speed_content_width"
@@ -195,6 +197,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
+
+    </FrameLayout>
+
+    <!-- 剧集控制区-->
+    <FrameLayout
+        android:id="@+id/selection_content"
+        android:layout_width="@dimen/player_selection_content_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/content_background"
+        android:clipToPadding="false">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selection_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:paddingBottom="20dp" />
 
     </FrameLayout>
 
@@ -401,6 +422,18 @@
                     android:paddingRight="10dp"
                     android:singleLine="true"
                     android:text="@string/resolution_type"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/selection_flag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:singleLine="true"
+                    android:text="@string/player_list"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 

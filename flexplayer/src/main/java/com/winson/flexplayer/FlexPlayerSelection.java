@@ -41,7 +41,7 @@ public interface FlexPlayerSelection {
      *
      * @return 描述信息
      */
-    String getDescription();
+    String getDiscription();
 
 
 }
