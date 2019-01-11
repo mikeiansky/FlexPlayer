@@ -220,12 +220,22 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (currentState == FlexPlayer.State.NONE || currentState == FlexPlayer.State.SETUP) {
-                    if (flexPlayer != null) {
-                        flexPlayer.start();
+                if (isLock) {
+                    if (!lockOnAnimator) {
+                        if (onShowLockContent) {
+                            hiddenLockContentRunnableDelay(false);
+                        } else {
+                            showLockContent();
+                        }
                     }
                 } else {
-                    showToolBar(onToolContentHidden);
+                    if (currentState == FlexPlayer.State.NONE || currentState == FlexPlayer.State.SETUP) {
+                        if (flexPlayer != null) {
+                            flexPlayer.start();
+                        }
+                    } else {
+                        showToolBar(onToolContentHidden);
+                    }
                 }
             }
         });
@@ -389,9 +399,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 if (isLock) {
                     lockFlag.setBackgroundResource(R.drawable.ic_lock_open);
                     isLock = false;
+                    hiddenLockContentRunnableDelay(false);
                 } else {
                     lockFlag.setBackgroundResource(R.drawable.ic_lock);
                     isLock = true;
+                    showToolBar(false);
                 }
             }
         });
@@ -828,7 +840,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private void hiddenLockContentRunnableDelay(boolean delay) {
         handler.removeCallbacks(hiddenLockContentRunnable);
         if (delay) {
-            handler.postDelayed(hiddenSelectionContentRunnable, 5000);
+            handler.postDelayed(hiddenLockContentRunnable, 5000);
         } else {
             hiddenLockContentRunnable.run();
         }
@@ -987,7 +999,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         if (action == MotionEvent.ACTION_DOWN) {
             clearAllHiddenRunnable();
         } else if (action == MotionEvent.ACTION_UP) {
-            if(!detailByOnTouchEvent){
+            if (!isLock && !detailByOnTouchEvent) {
                 hiddenToolContentDelay(true);
             }
             detailByOnTouchEvent = false;
@@ -1005,7 +1017,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             return super.onTouchEvent(event);
         }
         // 没有装载数据和加载数据的时候
-        if (currentState == FlexPlayer.State.NONE
+        if (isLock || currentState == FlexPlayer.State.NONE
                 || currentState == FlexPlayer.State.PREPARE) {
             return super.onTouchEvent(event);
         }
@@ -1141,6 +1153,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     public boolean exitFullScreen() {
+        if (isLock) {
+            return true;
+        }
         if (onShowSpeedContent) {
             hiddenSpeedContentDelay(false);
             return true;
