@@ -215,7 +215,6 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        FlexPlayerSpeed.values();
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setOnClickListener(new OnClickListener() {
             @Override
