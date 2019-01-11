@@ -145,12 +145,19 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
     private AudioManager audioManager;
     private Handler handler = new Handler();
 
+    /**
+     * 隐藏工具栏任务
+     */
     private Runnable hiddenToolContentRunnable = new Runnable() {
         @Override
         public void run() {
             showToolBar(false);
         }
     };
+
+    /**
+     * 隐藏倍速控制组件任务
+     */
     private Runnable hiddenSpeedContentRunnable = new Runnable() {
         @Override
         public void run() {
@@ -159,6 +166,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+
+    /**
+     * 隐藏分辨率控制组件任务
+     */
     private Runnable hiddenResolutionContentRunnable = new Runnable() {
         @Override
         public void run() {
@@ -167,6 +178,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+
+    /**
+     * 隐藏剧集控制组件任务
+     */
     private Runnable hiddenSelectionContentRunnable = new Runnable() {
         @Override
         public void run() {
@@ -175,6 +190,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+
+    /**
+     * 隐藏锁屏控制组件任务
+     */
     private Runnable hiddenLockContentRunnable = new Runnable() {
         @Override
         public void run() {
@@ -183,6 +202,10 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
             }
         }
     };
+
+    /**
+     * 更新时间任务
+     */
     private Runnable updateTimeRunnable = new Runnable() {
         @Override
         public void run() {
