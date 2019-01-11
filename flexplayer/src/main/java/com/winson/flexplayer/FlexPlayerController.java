@@ -324,7 +324,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         restartOrPause.setOnClickListener(this);
 
         hiddenSpeedContent();
-        hiddenBar();
+        hiddenToolContent();
         hiddenResolutionContent();
         hiddenSelectionContent();
         hiddenLockContent();
@@ -481,7 +481,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                hiddenBar();
+                hiddenToolContent();
             }
 
             @Override
@@ -799,6 +799,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         });
     }
 
+    /**
+     * 展示上部和下部的控制工具栏
+     *
+     * @param show 是否显示，true显示，false 不显示
+     */
     private void showToolBar(boolean show) {
         if (!onAnimator) {
             if (show && onToolContentHidden) {
@@ -816,6 +821,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 启动更新时间任务，只在全屏模式下才会更新
+     *
+     * @param mode
+     */
     private void startUpdateTime(FlexPlayer.Mode mode) {
         if (mode == FlexPlayer.Mode.FULL_SCREEN) {
             if (!onUpdateTime) {
@@ -826,17 +836,28 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 停止更新时间任务
+     */
     private void stopUpdateTime() {
         handler.removeCallbacks(updateTimeRunnable);
         onUpdateTime = false;
     }
 
+    /**
+     * 隐藏锁定组件，非动画形式
+     */
     private void hiddenLockContent() {
         onShowLockContent = false;
         handler.removeCallbacks(hiddenLockContentRunnable);
         lockContent.setTranslationX(-lockMarginLeft);
     }
 
+    /**
+     * 隐藏锁定组件，动画形式
+     *
+     * @param delay 是否延迟，true 延迟， false 不延迟
+     */
     private void hiddenLockContentRunnableDelay(boolean delay) {
         handler.removeCallbacks(hiddenLockContentRunnable);
         if (delay) {
@@ -846,6 +867,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 显示锁定组件，动画形式
+     */
     private void showLockContent() {
         handler.removeCallbacks(hiddenLockContentRunnable);
         if (!lockOnAnimator && !onShowLockContent) {
@@ -853,31 +877,46 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 显示锁定组件，非动画形式
+     */
     private void showLockContentMoment() {
         handler.removeCallbacks(hiddenSpeedContentRunnable);
         onShowLockContent = true;
         lockContent.setTranslationX(0);
     }
 
+    /**
+     * 隐藏倍速控制组件，非动画形式
+     */
     private void hiddenSpeedContent() {
         onShowSpeedContent = false;
         handler.removeCallbacks(hiddenSpeedContentRunnable);
         speedGroup.setTranslationX(speedContentWidth);
     }
 
+    /**
+     * 隐藏分辨率控制组件，非动画形式
+     */
     private void hiddenResolutionContent() {
         onShowResolutionContent = false;
         handler.removeCallbacks(hiddenResolutionContentRunnable);
         resolutionContent.setTranslationX(speedContentWidth);
     }
 
+    /**
+     * 隐藏剧集控制组件，非动画形式
+     */
     private void hiddenSelectionContent() {
         onShowSelectionContent = false;
         handler.removeCallbacks(hiddenSelectionContentRunnable);
         selectionContent.setTranslationX(selectionContentWidth);
     }
 
-    private void hiddenBar() {
+    /**
+     * 隐藏工具栏组件，非动画形式
+     */
+    private void hiddenToolContent() {
         handler.removeCallbacks(hiddenToolContentRunnable);
         onAnimator = false;
         onToolContentHidden = true;
@@ -885,6 +924,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         bottom.setTranslationY(barHeight);
     }
 
+    /**
+     * 隐藏工具栏组件，动画形式
+     *
+     * @param delay 是否延迟触发，true延迟触发，false不延迟
+     */
     private void hiddenToolContentDelay(boolean delay) {
         handler.removeCallbacks(hiddenToolContentRunnable);
         if (delay) {
@@ -894,6 +938,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 显示倍速控制组件，动画形式
+     */
     private void showSpeedContent() {
         handler.removeCallbacks(hiddenSpeedContentRunnable);
         if (!onShowSpeedContent) {
@@ -901,6 +948,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 隐藏倍速控制组件，动画形式
+     *
+     * @param delay 是否延迟，true延迟，false不延迟
+     */
     private void hiddenSpeedContentDelay(boolean delay) {
         handler.removeCallbacks(hiddenSpeedContentRunnable);
         if (delay) {
@@ -910,6 +962,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 显示剧集控制组件，动画形式
+     */
     private void showSelectionContent() {
         handler.removeCallbacks(hiddenSelectionContentRunnable);
         if (!onShowSelectionContent) {
@@ -917,6 +972,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 隐藏剧集组件
+     *
+     * @param delay 是否需要延迟触发，true需要延迟，false不需要延迟
+     */
     private void hiddenSelectionContentDelay(boolean delay) {
         handler.removeCallbacks(hiddenSelectionContentRunnable);
         if (delay) {
@@ -926,6 +986,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 显示分辨率组件
+     */
     private void showResolutionContent() {
         handler.removeCallbacks(hiddenResolutionContentRunnable);
         if (!onShowResolutionContent) {
@@ -933,6 +996,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 隐藏分辨率组件
+     *
+     * @param delay 是否延迟，true延迟，false不延迟
+     */
     private void hiddenResolutionContentDelay(boolean delay) {
         handler.removeCallbacks(hiddenResolutionContentRunnable);
         if (delay) {
@@ -942,6 +1010,9 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 清除各种隐藏定时控制
+     */
     private void clearAllHiddenRunnable() {
         handler.removeCallbacks(hiddenSelectionContentRunnable);
         handler.removeCallbacks(hiddenResolutionContentRunnable);
@@ -949,6 +1020,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         handler.removeCallbacks(hiddenToolContentRunnable);
     }
 
+    /**
+     * 是否显示返回按钮
+     *
+     * @param show
+     */
     public void showBackImage(boolean show) {
         backImage.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
@@ -1152,6 +1228,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         updateSpeed(flexPlayer.getSpeed());
     }
 
+    /**
+     * 退出全屏模式，在全屏模式下退出并且检测是否需要自己处理
+     *
+     * @return true 需要自己处理，false 不需要自己处理
+     */
     public boolean exitFullScreen() {
         if (isLock) {
             return true;
@@ -1222,6 +1303,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     }
 
+    /**
+     * 设置当前的播放窗口模式，全屏或非全屏
+     *
+     * @param mode
+     */
     public void setCurrentMode(FlexPlayer.Mode mode) {
         if (mode == FlexPlayer.Mode.FULL_SCREEN) {
             enterFullScreen.setBackgroundResource(R.drawable.ic_player_shrink);
@@ -1251,18 +1337,34 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         currentMode = mode;
     }
 
+    /**
+     * 获取封面ImageView
+     * @return 封面控件
+     */
     public ImageView getCoverImage() {
         return coverImage;
     }
 
+    /**
+     * 设置中间播放按钮的资源
+     * @param res 资源
+     */
     public void setCenterStartBackground(int res) {
         centerStart.setBackgroundResource(res);
     }
 
+    /**
+     * 设置标题
+     * @param title
+     */
     public void setTitle(String title) {
         titleTextView.setText(title);
     }
 
+    /**
+     * 设置标题
+     * @param title
+     */
     public void setTitle(@StringRes int titleRes) {
         titleTextView.setText(titleRes);
     }
@@ -1273,12 +1375,20 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         stopUpdateTime();
     }
 
+    /**
+     * 更新播放速度
+     *
+     * @param speed 播放速度
+     */
     private void updateSpeed(float speed) {
         if (flexPlayerSpeedAdapter != null) {
             flexPlayerSpeedAdapter.updateSpeed(speed);
         }
     }
 
+    /**
+     * 更新播放进度
+     */
     public void updateProgress() {
         long position = flexPlayer.getPosition();
         long duration = flexPlayer.getDuration();
@@ -1293,6 +1403,11 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
         }
     }
 
+    /**
+     * 设置当前播放器的播放状态
+     *
+     * @param state 播放状态
+     */
     public void setCurrentState(FlexPlayer.State state) {
         switch (state) {
             case SETUP:
@@ -1312,7 +1427,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
                 coverImage.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
                 restartOrPause.setBackgroundResource(R.drawable.ic_player_start);
-                hiddenBar();
+                hiddenToolContent();
                 break;
             case PREPARE:
             case BUFFER_START:
