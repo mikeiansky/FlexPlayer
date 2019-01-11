@@ -1385,7 +1385,7 @@ public class FlexPlayerController extends FrameLayout implements View.OnClickLis
 
     /**
      * 设置标题
-     * @param title
+     * @param titleRes
      */
     public void setTitle(@StringRes int titleRes) {
         titleTextView.setText(titleRes);
